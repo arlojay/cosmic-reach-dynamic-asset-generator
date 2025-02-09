@@ -1,16 +1,15 @@
 {
-  "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "./dist/",
-    "sourceMap": true,
-    "declaration": false,
-    "noImplicitAny": true,
-    "downlevelIteration": true,
-    "experimentalDecorators": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "target": "ESNext",
-    "lib": ["ESNext", "dom"],
-  }
+    "compilerOptions": {
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "target": "ESNext",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "sourceRoot": "./src/",
+        "outDir": "dist",
+        "declaration": true
+    },
+    "lib": [
+        "es2015"
+    ]
 }
