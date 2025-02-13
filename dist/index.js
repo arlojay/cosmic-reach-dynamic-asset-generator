@@ -17,6 +17,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./api/block"), exports);
 __exportStar(require("./api/blockModel"), exports);
 __exportStar(require("./api/blockState"), exports);
+__exportStar(require("./api/blockbench"), exports);
 __exportStar(require("./api/boilerplate"), exports);
 __exportStar(require("./api/colorizedTexture"), exports);
 __exportStar(require("./api/colors"), exports);

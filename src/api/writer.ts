@@ -64,6 +64,19 @@ export class Writer {
 
             this.writeFile(blockPath, block.serialize());
         }
+        
+        let includedBlockModels = 0;
+        do {
+            includedBlockModels = 0;
+            for(const triggerSheet of this.mod.blockModels) {
+                if(!usedBlockModels.has(triggerSheet)) continue;
+                if(!(triggerSheet.parent instanceof BlockModel)) continue;
+                if(usedBlockModels.has(triggerSheet.parent)) continue;
+
+                usedBlockModels.add(triggerSheet.parent);
+                includedBlockModels++;
+            }
+        } while(includedBlockModels > 0);
 
         for(const blockModel of this.mod.blockModels) {
             const modelPath = path.join(directory, blockModel.getBlockModelPath());

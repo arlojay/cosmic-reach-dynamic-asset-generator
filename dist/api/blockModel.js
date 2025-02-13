@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BlockModel = exports.SerializedBlockModel = exports.BlockModelCuboid = exports.BlockModelFace = void 0;
 const three_1 = require("three");
+const identifier_1 = require("./identifier");
 class BlockModelFace {
     receiveAO = null;
     texture = null;
@@ -156,6 +157,7 @@ class SerializedBlockModel {
     cuboids;
     cullsSelf;
     isTransparent;
+    parent;
 }
 exports.SerializedBlockModel = SerializedBlockModel;
 class BlockModel {
@@ -164,9 +166,13 @@ class BlockModel {
     id;
     cullsSelf = null;
     transparent = null;
+    parent = null;
     constructor(mod, id) {
         this.mod = mod;
         this.id = id;
+    }
+    setParent(parent) {
+        this.parent = parent;
     }
     getUsedTextures() {
         const usedTextures = new Set;
@@ -256,6 +262,17 @@ class BlockModel {
             object.cullsSelf = this.cullsSelf;
         if (this.transparent != null)
             object.isTransparent = this.transparent;
+        if (this.parent != null) {
+            if (this.parent instanceof BlockModel) {
+                object.parent = this.parent.id.toString();
+            }
+            else if (this.parent instanceof identifier_1.Identifier) {
+                object.parent = this.parent.toString();
+            }
+            else {
+                object.parent = this.parent;
+            }
+        }
         return object;
     }
     getBlockModelPath() {

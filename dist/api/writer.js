@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Writer = void 0;
 const node_path_1 = __importDefault(require("node:path"));
 const node_fs_1 = __importDefault(require("node:fs"));
+const blockModel_1 = require("./blockModel");
 const triggerSheet_1 = require("./triggerSheet");
 const node_stream_1 = require("node:stream");
 class Writer {
@@ -60,6 +61,20 @@ class Writer {
             }
             this.writeFile(blockPath, block.serialize());
         }
+        let includedBlockModels = 0;
+        do {
+            includedBlockModels = 0;
+            for (const triggerSheet of this.mod.blockModels) {
+                if (!usedBlockModels.has(triggerSheet))
+                    continue;
+                if (!(triggerSheet.parent instanceof blockModel_1.BlockModel))
+                    continue;
+                if (usedBlockModels.has(triggerSheet.parent))
+                    continue;
+                usedBlockModels.add(triggerSheet.parent);
+                includedBlockModels++;
+            }
+        } while (includedBlockModels > 0);
         for (const blockModel of this.mod.blockModels) {
             const modelPath = node_path_1.default.join(directory, blockModel.getBlockModelPath());
             if (!usedBlockModels.has(blockModel))

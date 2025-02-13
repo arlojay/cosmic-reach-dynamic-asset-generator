@@ -18,7 +18,7 @@ export class BlockModelFace {
     public uvMin: Vector2 = new Vector2;
     public uvMax: Vector2 = new Vector2;
     public cull: boolean = false;
-    public uvRotation: number | null = null;
+    public uvRotation: (0 | 90 | 180 | 270) | null = null;
 
     public serialize(textureId: string): SerializedBlockModelFace {
         const object: SerializedBlockModelFace = {
@@ -218,6 +218,7 @@ export class SerializedBlockModel {
     cuboids: SerializedBlockModelCuboid[];
     cullsSelf?: boolean;
     isTransparent?: boolean;
+    parent?: string;
 }
 
 export class BlockModel {
@@ -226,10 +227,15 @@ export class BlockModel {
     public id: Identifier;
     public cullsSelf: boolean = null;
     public transparent: boolean = null;
+    public parent: Identifier | string | BlockModel = null;
 
     public constructor(mod: Mod, id: Identifier) {
         this.mod = mod;
         this.id = id;
+    }
+
+    public setParent(parent: Identifier | string | BlockModel) {
+        this.parent = parent;
     }
 
     public getUsedTextures() {
@@ -344,6 +350,16 @@ export class BlockModel {
 
         if(this.cullsSelf != null) object.cullsSelf = this.cullsSelf;
         if(this.transparent != null) object.isTransparent = this.transparent;
+
+        if(this.parent != null) {
+            if(this.parent instanceof BlockModel) {
+                object.parent = this.parent.id.toString();
+            } else if(this.parent instanceof Identifier) {
+                object.parent = this.parent.toString();
+            } else {
+                object.parent = this.parent;
+            }
+        }
 
         return object;
     }

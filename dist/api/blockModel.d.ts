@@ -15,7 +15,7 @@ export declare class BlockModelFace {
     uvMin: Vector2;
     uvMax: Vector2;
     cull: boolean;
-    uvRotation: number | null;
+    uvRotation: (0 | 90 | 180 | 270) | null;
     serialize(textureId: string): SerializedBlockModelFace;
     clone(): BlockModelFace;
 }
@@ -64,6 +64,7 @@ export declare class SerializedBlockModel {
     cuboids: SerializedBlockModelCuboid[];
     cullsSelf?: boolean;
     isTransparent?: boolean;
+    parent?: string;
 }
 export declare class BlockModel {
     private mod;
@@ -71,7 +72,9 @@ export declare class BlockModel {
     id: Identifier;
     cullsSelf: boolean;
     transparent: boolean;
+    parent: Identifier | string | BlockModel;
     constructor(mod: Mod, id: Identifier);
+    setParent(parent: Identifier | string | BlockModel): void;
     getUsedTextures(): Set<Texture>;
     recalculateUVs(): void;
     createCuboid(box?: Box3): BlockModelCuboid;
