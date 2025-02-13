@@ -30,4 +30,3 @@ class Mod {
     }
 }
 exports.Mod = Mod;
-//# sourceMappingURL=mod.js.map

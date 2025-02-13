@@ -90,9 +90,11 @@ class DirectionList {
 }
 exports.DirectionList = DirectionList;
 class DirectionMap {
-    directions;
+    directions = new Map;
     constructor(directions = []) {
-        this.directions = new Map(directions.map(dir => [dir.name, dir]));
+        for (const direction of directions) {
+            this.addDirection(direction);
+        }
     }
     *[Symbol.iterator]() {
         yield* this.directions.values();
@@ -159,4 +161,3 @@ class Directions {
     ]);
 }
 exports.Directions = Directions;
-//# sourceMappingURL=directions.js.map

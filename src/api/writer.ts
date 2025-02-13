@@ -84,6 +84,19 @@ export class Writer {
 
             this.writeFile(modelPath, blockModel.serialize());
         }
+        
+        let includedTriggerSheets = 0;
+        do {
+            includedTriggerSheets = 0;
+            for(const triggerSheet of this.mod.triggerSheets) {
+                if(!usedTriggerSheets.has(triggerSheet)) continue;
+                if(!(triggerSheet.parent instanceof TriggerSheet)) continue;
+                if(usedTriggerSheets.has(triggerSheet.parent)) continue;
+
+                usedTriggerSheets.add(triggerSheet.parent);
+                includedTriggerSheets++;
+            }
+        } while(includedTriggerSheets > 0);
 
         for(const triggerSheet of this.mod.triggerSheets) {
             const triggerSheetPath = path.join(directory, triggerSheet.getTriggerSheetPath());

@@ -17,6 +17,7 @@ export class TriggerAction<T extends Record<string, any> = {}> {
 
     public if(condition: TriggerPredicate<any>) {
         this.condition = condition;
+        return this;
     }
 
     public serialize(): SerializedTriggerAction {
@@ -65,4 +66,10 @@ export class CycleBlockStateParamsAction extends TriggerAction<{
     params: Record<string, string[]>;
 }> {
     public name: string = "base:cycle_block_state_params";
+}
+
+export class ItemDropAction extends TriggerAction<{
+    position: [ number, number, number ]
+}> {
+    public name: string = "base:item_drop";
 }

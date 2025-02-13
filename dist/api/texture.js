@@ -35,4 +35,3 @@ class Texture {
     }
 }
 exports.Texture = Texture;
-//# sourceMappingURL=texture.js.map

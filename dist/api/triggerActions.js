@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CycleBlockStateParamsAction = exports.SetBlockStateParamsAction = exports.ReplaceBlockStateAction = exports.RunTriggerAction = exports.TriggerAction = void 0;
+exports.ItemDropAction = exports.CycleBlockStateParamsAction = exports.SetBlockStateParamsAction = exports.ReplaceBlockStateAction = exports.RunTriggerAction = exports.TriggerAction = void 0;
 class TriggerAction {
     name;
     condition;
@@ -10,6 +10,7 @@ class TriggerAction {
     }
     if(condition) {
         this.condition = condition;
+        return this;
     }
     serialize() {
         const object = {
@@ -39,4 +40,7 @@ class CycleBlockStateParamsAction extends TriggerAction {
     name = "base:cycle_block_state_params";
 }
 exports.CycleBlockStateParamsAction = CycleBlockStateParamsAction;
-//# sourceMappingURL=triggerActions.js.map
+class ItemDropAction extends TriggerAction {
+    name = "base:item_drop";
+}
+exports.ItemDropAction = ItemDropAction;

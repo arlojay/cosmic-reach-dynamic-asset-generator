@@ -2,6 +2,7 @@ export declare class TriggerPredicate<T> {
     constructor(predicate?: T);
 }
 export declare class LogicPredicate extends TriggerPredicate<ILogicPredicate> {
+    constructor(predicate: ILogicPredicate);
 }
 export interface ILogicPredicate {
     or?: TriggerPredicate<any>[];
@@ -38,7 +39,7 @@ export declare class PlayerGamemodePredicate extends TriggerPredicate<IPlayerGam
 export interface IPlayerGamemodePredicate {
     allows_items_drop_on_break: boolean;
 }
-export interface PlayerPredicate extends TriggerPredicate<IPlayerPredicate> {
+export declare class PlayerPredicate extends TriggerPredicate<IPlayerPredicate> {
 }
 export interface IPlayerPredicate {
     gamemode: PlayerGamemodePredicate;

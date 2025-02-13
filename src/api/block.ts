@@ -18,11 +18,8 @@ export class Block {
     public id: Identifier;
     private mod: Mod;
 
-    public isOpaque: boolean = false;
-    public tags: Set<string> = new Set;
     public properties: BlockProperties;
 
-    public dropState: BlockState = null;
     public defaultState: BlockState = null;
     public fallbackParams: BlockState = null;
     
@@ -36,7 +33,6 @@ export class Block {
 
     public createState(blockStateString: Map<string, string> | Record<string, string> | string | null): BlockState {
         const blockState = new BlockState(this.mod, this);
-        if(this.dropState == null) this.dropState = blockState;
         if(this.defaultState == null) this.defaultState = blockState;
         
         this.blockStates.add(blockState);

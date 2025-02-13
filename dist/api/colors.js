@@ -79,4 +79,3 @@ class Colors {
     ]);
 }
 exports.Colors = Colors;
-//# sourceMappingURL=colors.js.map

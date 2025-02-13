@@ -5,10 +5,7 @@ const blockState_1 = require("./blockState");
 class Block {
     id;
     mod;
-    isOpaque = false;
-    tags = new Set;
     properties;
-    dropState = null;
     defaultState = null;
     fallbackParams = null;
     blockStates = new Set;
@@ -19,8 +16,6 @@ class Block {
     }
     createState(blockStateString) {
         const blockState = new blockState_1.BlockState(this.mod, this);
-        if (this.dropState == null)
-            this.dropState = blockState;
         if (this.defaultState == null)
             this.defaultState = blockState;
         this.blockStates.add(blockState);
@@ -74,4 +69,3 @@ class Block {
     }
 }
 exports.Block = Block;
-//# sourceMappingURL=block.js.map

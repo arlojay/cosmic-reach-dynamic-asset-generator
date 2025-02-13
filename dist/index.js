@@ -17,6 +17,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./api/block"), exports);
 __exportStar(require("./api/blockModel"), exports);
 __exportStar(require("./api/blockState"), exports);
+__exportStar(require("./api/boilerplate"), exports);
 __exportStar(require("./api/colorizedTexture"), exports);
 __exportStar(require("./api/colors"), exports);
 __exportStar(require("./api/directions"), exports);
@@ -28,4 +29,3 @@ __exportStar(require("./api/triggerActions"), exports);
 __exportStar(require("./api/triggerPredicates"), exports);
 __exportStar(require("./api/triggerSheet"), exports);
 __exportStar(require("./api/writer"), exports);
-//# sourceMappingURL=index.js.map

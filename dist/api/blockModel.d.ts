@@ -50,7 +50,8 @@ export declare class BlockModelCuboid {
     up: BlockModelFace;
     constructor();
     setSize(minX: number, minY: number, minZ: number, maxX: number, maxY: number, maxZ: number, preventUVReset?: boolean): void;
-    resetUVs(): void;
+    recalculateCullFaces(): void;
+    recalculateUVs(): void;
     getAllFaces(): BlockModelFace[];
     applyTransformation(transformation: Matrix4): void;
     setAllTextures(texture: Texture): void;
@@ -61,15 +62,18 @@ export declare class BlockModelCuboid {
 export declare class SerializedBlockModel {
     textures: Record<string, SerializedBlockTexture>;
     cuboids: SerializedBlockModelCuboid[];
+    cullsSelf?: boolean;
+    isTransparent?: boolean;
 }
 export declare class BlockModel {
     private mod;
     private cuboids;
     id: Identifier;
+    cullsSelf: boolean;
+    transparent: boolean;
     constructor(mod: Mod, id: Identifier);
-    serialize(): SerializedBlockModel;
     getUsedTextures(): Set<Texture>;
-    resetUVs(): void;
+    recalculateUVs(): void;
     createCuboid(box?: Box3): BlockModelCuboid;
     addCuboid(...cuboids: BlockModelCuboid[]): void;
     removeCuboid(...cuboids: BlockModelCuboid[]): void;
@@ -78,6 +82,7 @@ export declare class BlockModel {
     addModel(...models: BlockModel[]): void;
     applyTransformation(transformation: Matrix4): void;
     setAllTextures(texture: Texture): void;
+    serialize(): SerializedBlockModel;
     getBlockModelPath(): string;
     getBlockModelId(): Identifier;
 }

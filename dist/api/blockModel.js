@@ -43,38 +43,50 @@ class BlockModelCuboid {
     down = new BlockModelFace;
     up = new BlockModelFace;
     constructor() {
-        this.resetUVs();
+        this.recalculateUVs();
+        this.recalculateCullFaces();
     }
     setSize(minX, minY, minZ, maxX, maxY, maxZ, preventUVReset = false) {
         this.box.set(new three_1.Vector3(minX, minY, minZ), new three_1.Vector3(maxX, maxY, maxZ));
-        if (!preventUVReset)
-            this.resetUVs();
+        if (!preventUVReset) {
+            this.recalculateUVs();
+            this.recalculateCullFaces();
+        }
     }
-    resetUVs() {
+    recalculateCullFaces() {
+        this.west.cull = this.box.min.x == 0;
+        this.east.cull = this.box.max.x == 16;
+        this.north.cull = this.box.max.z == 16;
+        this.south.cull = this.box.min.z == 0;
+        this.down.cull = this.box.min.y == 0;
+        this.up.cull = this.box.max.y == 16;
+    }
+    recalculateUVs() {
         this.west.uvMin.set(this.box.min.z, this.box.min.y);
         this.west.uvMax.set(this.box.max.z, this.box.max.y);
-        this.west.cull = this.box.min.x == 0;
-        this.west.uvRotation = null;
         this.east.uvMin.set(16 - this.box.max.z, this.box.min.y);
         this.east.uvMax.set(16 - this.box.min.z, this.box.max.y);
-        this.east.cull = this.box.max.x == 16;
-        this.east.uvRotation = null;
         this.north.uvMin.set(this.box.min.x, this.box.min.y);
         this.north.uvMax.set(this.box.max.x, this.box.max.y);
-        this.north.cull = this.box.max.z == 16;
-        this.north.uvRotation = null;
         this.south.uvMin.set(16 - this.box.max.x, this.box.min.y);
         this.south.uvMax.set(16 - this.box.min.x, this.box.max.y);
-        this.south.cull = this.box.min.z == 0;
-        this.south.uvRotation = null;
         this.down.uvMin.set(this.box.min.x, this.box.min.z);
         this.down.uvMax.set(this.box.max.x, this.box.max.z);
-        this.down.cull = this.box.min.y == 0;
-        this.down.uvRotation = null;
         this.up.uvMin.set(this.box.min.x, 16 - this.box.max.z);
         this.up.uvMax.set(this.box.max.x, 16 - this.box.min.z);
-        this.up.cull = this.box.max.y == 16;
-        this.up.uvRotation = null;
+        const center = new three_1.Vector2(8, 8);
+        for (const face of this.getAllFaces()) {
+            if (face.uvRotation != null && face.uvRotation % 180 == 90) {
+                face.uvMin.rotateAround(center, Math.PI * 0.5);
+                face.uvMax.rotateAround(center, Math.PI * 0.5);
+                const minX = Math.min(face.uvMin.x, face.uvMax.x);
+                const minY = Math.min(face.uvMin.y, face.uvMax.y);
+                const maxX = Math.max(face.uvMin.x, face.uvMax.x);
+                const maxY = Math.max(face.uvMin.y, face.uvMax.y);
+                face.uvMin.set(minX, minY);
+                face.uvMax.set(maxX, maxY);
+            }
+        }
     }
     getAllFaces() {
         return [
@@ -142,45 +154,19 @@ exports.BlockModelCuboid = BlockModelCuboid;
 class SerializedBlockModel {
     textures;
     cuboids;
+    cullsSelf;
+    isTransparent;
 }
 exports.SerializedBlockModel = SerializedBlockModel;
 class BlockModel {
     mod;
     cuboids = new Set;
     id;
+    cullsSelf = null;
+    transparent = null;
     constructor(mod, id) {
         this.mod = mod;
         this.id = id;
-    }
-    serialize() {
-        const cuboids = Array.from(this.cuboids);
-        const allFaces = cuboids.reduce((allFaces, cuboid) => allFaces.concat(cuboid.getAllFaces()), new Array);
-        const textures = new Set(allFaces.map(face => face.texture).filter(v => v != null));
-        const remappedTextures = new Map;
-        const textureIds = new Map;
-        const serializedTextures = new Map;
-        for (const texture of textures) {
-            let existingTexture;
-            let remappedId;
-            let i = 0;
-            do {
-                remappedId = (i == 0) ? (texture.id) : (texture.id + "_" + i);
-                existingTexture = remappedTextures.get(remappedId);
-                i++;
-            } while (existingTexture != null && existingTexture != texture);
-            remappedTextures.set(remappedId, texture);
-            textureIds.set(texture, remappedId);
-            serializedTextures.set(remappedId, {
-                fileName: texture.getAsBlockTextureId(this.mod).toString()
-            });
-            for (const faceUsingTexture of allFaces.filter(face => face.texture == texture)) {
-                textureIds.set(faceUsingTexture, remappedId);
-            }
-        }
-        return {
-            textures: Object.fromEntries(serializedTextures),
-            cuboids: cuboids.map(cuboid => cuboid.serialize(textureIds))
-        };
     }
     getUsedTextures() {
         const usedTextures = new Set;
@@ -191,14 +177,16 @@ class BlockModel {
         }
         return usedTextures;
     }
-    resetUVs() {
+    recalculateUVs() {
         for (const cuboid of this.cuboids) {
-            cuboid.resetUVs();
+            cuboid.recalculateUVs();
         }
     }
     createCuboid(box = new three_1.Box3(new three_1.Vector3(0, 0, 0), new three_1.Vector3(16, 16, 16))) {
         const cuboid = new BlockModelCuboid();
         cuboid.box.copy(box);
+        cuboid.recalculateUVs();
+        cuboid.recalculateCullFaces();
         this.cuboids.add(cuboid);
         return cuboid;
     }
@@ -235,6 +223,41 @@ class BlockModel {
             cuboid.setAllTextures(texture);
         }
     }
+    serialize() {
+        const cuboids = Array.from(this.cuboids);
+        const allFaces = cuboids.reduce((allFaces, cuboid) => allFaces.concat(cuboid.getAllFaces()), new Array);
+        const textures = new Set(allFaces.map(face => face.texture).filter(v => v != null));
+        const remappedTextures = new Map;
+        const textureIds = new Map;
+        const serializedTextures = new Map;
+        for (const texture of textures) {
+            let existingTexture;
+            let remappedId;
+            let i = 0;
+            do {
+                remappedId = (i == 0) ? (texture.id) : (texture.id + "_" + i);
+                existingTexture = remappedTextures.get(remappedId);
+                i++;
+            } while (existingTexture != null && existingTexture != texture);
+            remappedTextures.set(remappedId, texture);
+            textureIds.set(texture, remappedId);
+            serializedTextures.set(remappedId, {
+                fileName: texture.getAsBlockTextureId(this.mod).toString()
+            });
+            for (const faceUsingTexture of allFaces.filter(face => face.texture == texture)) {
+                textureIds.set(faceUsingTexture, remappedId);
+            }
+        }
+        const object = {
+            textures: Object.fromEntries(serializedTextures),
+            cuboids: cuboids.map(cuboid => cuboid.serialize(textureIds))
+        };
+        if (this.cullsSelf != null)
+            object.cullsSelf = this.cullsSelf;
+        if (this.transparent != null)
+            object.isTransparent = this.transparent;
+        return object;
+    }
     getBlockModelPath() {
         return "models/blocks/" + this.id.getItem() + ".json";
     }
@@ -243,4 +266,3 @@ class BlockModel {
     }
 }
 exports.BlockModel = BlockModel;
-//# sourceMappingURL=blockModel.js.map

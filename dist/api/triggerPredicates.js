@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PlayerGamemodePredicate = exports.BlockStateWithPosPredicate = exports.BlockStatePredicate = exports.BlockEventPredicate = exports.LogicPredicate = exports.TriggerPredicate = void 0;
+exports.PlayerPredicate = exports.PlayerGamemodePredicate = exports.BlockStateWithPosPredicate = exports.BlockStatePredicate = exports.BlockEventPredicate = exports.LogicPredicate = exports.TriggerPredicate = void 0;
 class TriggerPredicate {
     constructor(predicate) {
         Object.assign(this, predicate);
@@ -8,6 +8,16 @@ class TriggerPredicate {
 }
 exports.TriggerPredicate = TriggerPredicate;
 class LogicPredicate extends TriggerPredicate {
+    constructor(predicate) {
+        if ("not" in predicate) {
+            super({
+                and: [{ not: predicate.not }, ...(predicate.and ?? [])]
+            });
+        }
+        else {
+            super(predicate);
+        }
+    }
 }
 exports.LogicPredicate = LogicPredicate;
 class BlockEventPredicate extends TriggerPredicate {
@@ -22,4 +32,6 @@ exports.BlockStateWithPosPredicate = BlockStateWithPosPredicate;
 class PlayerGamemodePredicate extends TriggerPredicate {
 }
 exports.PlayerGamemodePredicate = PlayerGamemodePredicate;
-//# sourceMappingURL=triggerPredicates.js.map
+class PlayerPredicate extends TriggerPredicate {
+}
+exports.PlayerPredicate = PlayerPredicate;

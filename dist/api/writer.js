@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Writer = void 0;
 const node_path_1 = __importDefault(require("node:path"));
 const node_fs_1 = __importDefault(require("node:fs"));
+const triggerSheet_1 = require("./triggerSheet");
 const node_stream_1 = require("node:stream");
 class Writer {
     mod;
@@ -73,6 +74,20 @@ class Writer {
             }
             this.writeFile(modelPath, blockModel.serialize());
         }
+        let includedTriggerSheets = 0;
+        do {
+            includedTriggerSheets = 0;
+            for (const triggerSheet of this.mod.triggerSheets) {
+                if (!usedTriggerSheets.has(triggerSheet))
+                    continue;
+                if (!(triggerSheet.parent instanceof triggerSheet_1.TriggerSheet))
+                    continue;
+                if (usedTriggerSheets.has(triggerSheet.parent))
+                    continue;
+                usedTriggerSheets.add(triggerSheet.parent);
+                includedTriggerSheets++;
+            }
+        } while (includedTriggerSheets > 0);
         for (const triggerSheet of this.mod.triggerSheets) {
             const triggerSheetPath = node_path_1.default.join(directory, triggerSheet.getTriggerSheetPath());
             if (!usedTriggerSheets.has(triggerSheet))
@@ -82,4 +97,3 @@ class Writer {
     }
 }
 exports.Writer = Writer;
-//# sourceMappingURL=writer.js.map

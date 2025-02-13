@@ -4,7 +4,17 @@ export class TriggerPredicate<T> {
     }
 }
 
-export class LogicPredicate extends TriggerPredicate<ILogicPredicate> { }
+export class LogicPredicate extends TriggerPredicate<ILogicPredicate> {
+    public constructor(predicate: ILogicPredicate) {
+        if("not" in predicate) {
+            super({
+                and: [ { not: predicate.not }, ...(predicate.and ?? []) ]
+            })
+        } else {
+            super(predicate);
+        }
+    }
+}
 export interface ILogicPredicate {
     or?: TriggerPredicate<any>[];
     and?: TriggerPredicate<any>[];
@@ -41,7 +51,7 @@ export interface IPlayerGamemodePredicate {
     allows_items_drop_on_break: boolean;
 }
 
-export interface PlayerPredicate extends TriggerPredicate<IPlayerPredicate> { }
+export class PlayerPredicate extends TriggerPredicate<IPlayerPredicate> { }
 export interface IPlayerPredicate {
     gamemode: PlayerGamemodePredicate;
 }

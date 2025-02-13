@@ -1,6 +1,7 @@
 export * from "./api/block";
 export * from "./api/blockModel";
 export * from "./api/blockState";
+export * from "./api/boilerplate";
 export * from "./api/colorizedTexture";
 export * from "./api/colors";
 export * from "./api/directions";

@@ -51,7 +51,7 @@ export declare class BlockState {
     tags: string[];
     stateGenerators: string[];
     hardness: number | null;
-    dropId: BlockState | null;
+    dropState: BlockState | null;
     catalogHidden: boolean | null;
     fuelTicks: number | null;
     light: [number, number, number] | null;

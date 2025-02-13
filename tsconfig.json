@@ -4,8 +4,6 @@
         "esModuleInterop": true,
         "target": "ESNext",
         "moduleResolution": "node",
-        "sourceMap": true,
-        "sourceRoot": "./src/",
         "outDir": "dist",
         "declaration": true
     },

@@ -55,7 +55,7 @@ export class BlockState {
     public tags: string[] = new Array;
     public stateGenerators: string[] = new Array;
     public hardness: number | null = null; // default 1?
-    public dropId: BlockState | null = null;
+    public dropState: BlockState | null = null;
     public catalogHidden: boolean | null = null;
     public fuelTicks: number | null = null; // part of intProperties.fuelTicks for some reason
     public light: [ number, number, number ] | null = null;
@@ -77,7 +77,7 @@ export class BlockState {
 
     public createBlockModel(id?: string) {
         const model = this.mod.createBlockModel(id ?? (
-            this.block.id.getItem() + "•" + this.compileParams().replace(/\=/g, "_").replace(/\,/g, "-"))
+            this.block.id.getItem() + "•" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_"))
         );
 
         this.model = model;
@@ -91,7 +91,7 @@ export class BlockState {
 
     public createTriggerSheet(id?: string) {
         const triggerSheet = this.mod.createTriggerSheet(id ??
-            (this.block.id.getItem() + "•" + this.compileParams().replace(/\=/g, "_").replace(/\,/g, "-"))
+            (this.block.id.getItem() + "•" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_"))
         );
 
         this.triggerSheet = triggerSheet;
@@ -134,7 +134,7 @@ export class BlockState {
         if(this.tags != null && this.tags.length > 0) object.tags = this.tags;
         if(this.stateGenerators != null && this.stateGenerators.length > 0) object.stateGenerators = this.stateGenerators;
         
-        if(this.dropId != null) object.dropId = this.dropId.getFullId();
+        if(this.dropState != null) object.dropId = this.dropState.getFullId();
         if(this.dropParamOverrides != null) object.dropParamOverrides = this.dropParamOverrides;
         if(this.swapGroupId != null) object.swapGroupId = this.swapGroupId.toString();
         if(this.allowSwapping != null) object.allowSwapping = this.allowSwapping;

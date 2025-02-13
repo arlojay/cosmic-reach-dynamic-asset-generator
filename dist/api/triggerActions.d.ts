@@ -9,7 +9,7 @@ export declare class TriggerAction<T extends Record<string, any> = {}> {
     condition?: TriggerPredicate<any>;
     parameters?: T | Record<string, any> | null;
     constructor(parameters?: T);
-    if(condition: TriggerPredicate<any>): void;
+    if(condition: TriggerPredicate<any>): this;
     serialize(): SerializedTriggerAction;
 }
 export declare class RunTriggerAction extends TriggerAction<{
@@ -42,6 +42,11 @@ export declare class CycleBlockStateParamsAction extends TriggerAction<{
     yOff?: number;
     zOff?: number;
     params: Record<string, string[]>;
+}> {
+    name: string;
+}
+export declare class ItemDropAction extends TriggerAction<{
+    position: [number, number, number];
 }> {
     name: string;
 }

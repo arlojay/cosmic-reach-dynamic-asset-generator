@@ -72,4 +72,3 @@ class TriggerSheet {
     }
 }
 exports.TriggerSheet = TriggerSheet;
-//# sourceMappingURL=triggerSheet.js.map

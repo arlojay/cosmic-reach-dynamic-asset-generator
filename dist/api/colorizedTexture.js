@@ -38,4 +38,3 @@ class ColorizedTexture {
     }
 }
 exports.ColorizedTexture = ColorizedTexture;
-//# sourceMappingURL=colorizedTexture.js.map

@@ -113,10 +113,12 @@ export class DirectionList {
 }
 
 export class DirectionMap {
-    directions: Map<string, Direction>;
+    directions: Map<string, Direction> = new Map;
 
     constructor(directions: Direction[] = []) {
-        this.directions = new Map(directions.map(dir => [dir.name, dir]));
+        for(const direction of directions) {
+            this.addDirection(direction);
+        }
     }
 
     *[Symbol.iterator]() {

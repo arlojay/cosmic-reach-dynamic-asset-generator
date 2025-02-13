@@ -13,10 +13,7 @@ export interface SerializedBlock {
 export declare class Block {
     id: Identifier;
     private mod;
-    isOpaque: boolean;
-    tags: Set<string>;
     properties: BlockProperties;
-    dropState: BlockState;
     defaultState: BlockState;
     fallbackParams: BlockState;
     private blockStates;
