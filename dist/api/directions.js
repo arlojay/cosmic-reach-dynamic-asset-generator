@@ -133,7 +133,7 @@ class DirectionMap {
     }
     vectorToDirection(vector) {
         return Array.from(this.directions.values()).reduce((closest, dir) => {
-            const distance = dir.vector.clone().normalize().distanceTo(vector.clone().normalize());
+            const distance = dir.vector.clone().normalize().distanceTo(new three_1.Vector3().copy(vector).normalize());
             return distance < closest.distance ? { direction: dir, distance } : closest;
         }, { direction: null, distance: Infinity }).direction;
     }

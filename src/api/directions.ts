@@ -1,4 +1,4 @@
-import { Vector3 } from "three";
+import { Vector3, Vector3Like } from "three";
 
 export class Direction {
     directionMap: DirectionMap | null = null;
@@ -165,9 +165,9 @@ export class DirectionMap {
         return this.vectorToDirection(inverseVector);
     }
 
-    vectorToDirection(vector: Vector3): Direction {
+    vectorToDirection(vector: Vector3Like): Direction {
         return Array.from(this.directions.values()).reduce((closest, dir) => {
-            const distance = dir.vector.clone().normalize().distanceTo(vector.clone().normalize());
+            const distance = dir.vector.clone().normalize().distanceTo(new Vector3().copy(vector).normalize());
             return distance < closest.distance ? { direction: dir, distance } : closest;
         }, { direction: null as Direction | null, distance: Infinity }).direction!;
     }

@@ -1,4 +1,4 @@
-import { Vector3 } from "three";
+import { Vector3, Vector3Like } from "three";
 export declare class Direction {
     directionMap: DirectionMap | null;
     name: string;
@@ -43,7 +43,7 @@ export declare class DirectionMap {
     values(): MapIterator<Direction>;
     keys(): MapIterator<string>;
     inverse(direction: Direction): Direction;
-    vectorToDirection(vector: Vector3): Direction;
+    vectorToDirection(vector: Vector3Like): Direction;
     all(): DirectionList;
     combinations(): DirectionList[];
 }
