@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BlockModel = exports.SerializedBlockModel = exports.BlockModelCuboid = exports.BlockModelFace = void 0;
 const three_1 = require("three");
+const texture_1 = require("./texture");
 const identifier_1 = require("./identifier");
 class BlockModelFace {
     receiveAO = null;
@@ -140,10 +141,10 @@ class BlockModelCuboid {
             object.faces.localPosY = this.up.serialize(textureIds.get(this.up.texture));
         }
         if (this.south.texture != null) {
-            object.faces.localNegZ = this.south.serialize(textureIds.get(this.south.texture));
+            object.faces.localPosZ = this.south.serialize(textureIds.get(this.south.texture));
         }
         if (this.north.texture != null) {
-            object.faces.localPosZ = this.north.serialize(textureIds.get(this.north.texture));
+            object.faces.localNegZ = this.north.serialize(textureIds.get(this.north.texture));
         }
         return object;
     }
@@ -163,6 +164,7 @@ exports.SerializedBlockModel = SerializedBlockModel;
 class BlockModel {
     mod;
     cuboids = new Set;
+    textureOverrides = new Map;
     id;
     cullsSelf = null;
     transparent = null;
@@ -209,6 +211,23 @@ class BlockModel {
     getCuboids() {
         return Array.from(this.cuboids);
     }
+    addTextureOverride(texture, id) {
+        this.textureOverrides.set(id, texture);
+    }
+    removeTextureOverride(texture) {
+        if (texture instanceof texture_1.Texture) {
+            for (const [key, value] of this.textureOverrides.entries()) {
+                if (value == texture)
+                    this.textureOverrides.delete(key);
+            }
+        }
+        else {
+            this.textureOverrides.delete(texture);
+        }
+    }
+    getTextureOverrides() {
+        return new Map(this.textureOverrides);
+    }
     clone(newId) {
         const model = new BlockModel(this.mod, this.id.derive(newId));
         model.addModel(this);
@@ -235,7 +254,10 @@ class BlockModel {
         const textures = new Set(allFaces.map(face => face.texture).filter(v => v != null));
         const remappedTextures = new Map;
         const textureIds = new Map;
-        const serializedTextures = new Map;
+        for (const [id, texture] of this.textureOverrides.entries()) {
+            remappedTextures.set(id, texture);
+            textureIds.set(texture, id);
+        }
         for (const texture of textures) {
             let existingTexture;
             let remappedId;
@@ -247,27 +269,29 @@ class BlockModel {
             } while (existingTexture != null && existingTexture != texture);
             remappedTextures.set(remappedId, texture);
             textureIds.set(texture, remappedId);
-            serializedTextures.set(remappedId, {
-                fileName: texture.getAsBlockTextureId(this.mod).toString()
-            });
             for (const faceUsingTexture of allFaces.filter(face => face.texture == texture)) {
                 textureIds.set(faceUsingTexture, remappedId);
             }
         }
-        const object = {
-            textures: Object.fromEntries(serializedTextures),
-            cuboids: cuboids.map(cuboid => cuboid.serialize(textureIds))
-        };
+        const object = {};
+        if (remappedTextures.size > 0)
+            object.textures = Object.fromEntries(remappedTextures.entries()
+                .map(([id, texture]) => ([
+                id,
+                { fileName: texture.getAsBlockTextureId(this.mod).toString() }
+            ])));
+        if (cuboids.length > 0)
+            object.cuboids = cuboids.map(cuboid => cuboid.serialize(textureIds));
         if (this.cullsSelf != null)
             object.cullsSelf = this.cullsSelf;
         if (this.transparent != null)
             object.isTransparent = this.transparent;
         if (this.parent != null) {
             if (this.parent instanceof BlockModel) {
-                object.parent = this.parent.id.toString();
+                object.parent = this.parent.getBlockModelId().toString();
             }
             else if (this.parent instanceof identifier_1.Identifier) {
-                object.parent = this.parent.toString();
+                object.parent = this.parent.derive("models/blocks/" + this.parent.getItem() + ".json").toString();
             }
             else {
                 object.parent = this.parent;

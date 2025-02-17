@@ -5,6 +5,12 @@ import { BlockModel } from "./blockModel";
 import { TriggerSheet } from "./triggerSheet";
 import { Texture } from "./texture";
 import { Stream } from "node:stream";
+import { Image } from "canvas";
+
+function* joinIterators<T>(iterator1: Iterable<T>, iterator2: Iterable<T>) {
+    yield* iterator1;
+    yield* iterator2;
+}
 
 export class Writer {
     private mod: Mod;
@@ -83,14 +89,14 @@ export class Writer {
 
             if(!usedBlockModels.has(blockModel)) continue;
 
-            for(const texture of blockModel.getUsedTextures()) {
+            for(const texture of joinIterators(blockModel.getUsedTextures().values(), blockModel.getTextureOverrides().values())) {
                 if(writtenBlockTextures.has(texture)) continue;
-                if(texture.texture == null) continue;
-
-                this.writeFile(
-                    path.join(directory, texture.getAsBlockTexturePath()),
-                    texture.createTextureStream()
-                );
+                if(texture.texture instanceof Image) {
+                    this.writeFile(
+                        path.join(directory, texture.getAsBlockTexturePath()),
+                        texture.createTextureStream()
+                    );
+                }
 
                 writtenBlockTextures.add(texture);
             }

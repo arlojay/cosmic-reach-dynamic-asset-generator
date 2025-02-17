@@ -9,6 +9,11 @@ const node_fs_1 = __importDefault(require("node:fs"));
 const blockModel_1 = require("./blockModel");
 const triggerSheet_1 = require("./triggerSheet");
 const node_stream_1 = require("node:stream");
+const canvas_1 = require("canvas");
+function* joinIterators(iterator1, iterator2) {
+    yield* iterator1;
+    yield* iterator2;
+}
 class Writer {
     mod;
     checkedFolders = new Array;
@@ -79,12 +84,12 @@ class Writer {
             const modelPath = node_path_1.default.join(directory, blockModel.getBlockModelPath());
             if (!usedBlockModels.has(blockModel))
                 continue;
-            for (const texture of blockModel.getUsedTextures()) {
+            for (const texture of joinIterators(blockModel.getUsedTextures().values(), blockModel.getTextureOverrides().values())) {
                 if (writtenBlockTextures.has(texture))
                     continue;
-                if (texture.texture == null)
-                    continue;
-                this.writeFile(node_path_1.default.join(directory, texture.getAsBlockTexturePath()), texture.createTextureStream());
+                if (texture.texture instanceof canvas_1.Image) {
+                    this.writeFile(node_path_1.default.join(directory, texture.getAsBlockTexturePath()), texture.createTextureStream());
+                }
                 writtenBlockTextures.add(texture);
             }
             this.writeFile(modelPath, blockModel.serialize());

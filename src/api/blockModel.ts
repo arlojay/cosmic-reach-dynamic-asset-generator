@@ -1,4 +1,4 @@
-import { Box2, Box3, Matrix4, Vector2, Vector3 } from "three";
+import { Box3, Matrix4, Vector2, Vector3 } from "three";
 import { Texture } from "./texture";
 import { Mod } from "./mod";
 import { Identifier } from "./identifier";
@@ -199,10 +199,10 @@ export class BlockModelCuboid {
             object.faces.localPosY = this.up.serialize(textureIds.get(this.up.texture));
         }
         if(this.south.texture != null) {
-            object.faces.localNegZ = this.south.serialize(textureIds.get(this.south.texture));
+            object.faces.localPosZ = this.south.serialize(textureIds.get(this.south.texture));
         }
         if(this.north.texture != null) {
-            object.faces.localPosZ = this.north.serialize(textureIds.get(this.north.texture));
+            object.faces.localNegZ = this.north.serialize(textureIds.get(this.north.texture));
         }
 
         return object;
@@ -214,8 +214,8 @@ export class BlockModelCuboid {
 }
 
 export class SerializedBlockModel {
-    textures: Record<string, SerializedBlockTexture>;
-    cuboids: SerializedBlockModelCuboid[];
+    textures?: Record<string, SerializedBlockTexture>;
+    cuboids?: SerializedBlockModelCuboid[];
     cullsSelf?: boolean;
     isTransparent?: boolean;
     parent?: string;
@@ -224,6 +224,8 @@ export class SerializedBlockModel {
 export class BlockModel {
     private mod: Mod;
     private cuboids: Set<BlockModelCuboid> = new Set;
+    private textureOverrides: Map<string, Texture> = new Map;
+
     public id: Identifier;
     public cullsSelf: boolean = null;
     public transparent: boolean = null;
@@ -283,6 +285,24 @@ export class BlockModel {
         return Array.from(this.cuboids);
     }
 
+    public addTextureOverride(texture: Texture, id: string) {
+        this.textureOverrides.set(id, texture);
+    }
+
+    public removeTextureOverride(texture: Texture | string) {
+        if(texture instanceof Texture) {
+            for(const [key, value] of this.textureOverrides.entries()) {
+                if(value == texture) this.textureOverrides.delete(key);
+            }
+        } else {
+            this.textureOverrides.delete(texture);
+        }
+    }
+
+    public getTextureOverrides() {
+        return new Map(this.textureOverrides);
+    }
+
     public clone(newId: string) {
         const model = new BlockModel(this.mod, this.id.derive(newId));
         
@@ -317,7 +337,11 @@ export class BlockModel {
 
         const remappedTextures: Map<string, Texture> = new Map;
         const textureIds: Map<Texture, string> = new Map;
-        const serializedTextures: Map<string, SerializedBlockTexture> = new Map;
+
+        for(const [ id, texture ] of this.textureOverrides.entries()) {
+            remappedTextures.set(id, texture);
+            textureIds.set(texture, id);
+        }
 
         for(const texture of textures) {
             let existingTexture: Texture;
@@ -333,9 +357,6 @@ export class BlockModel {
             
             remappedTextures.set(remappedId, texture);
             textureIds.set(texture, remappedId);
-            serializedTextures.set(remappedId, {
-                fileName: texture.getAsBlockTextureId(this.mod).toString()
-            });
 
             for(const faceUsingTexture of allFaces.filter(face => face.texture == texture)) {
                 textureIds.set(faceUsingTexture, remappedId);
@@ -343,19 +364,28 @@ export class BlockModel {
         }
 
 
-        const object: SerializedBlockModel = {
-            textures: Object.fromEntries(serializedTextures),
-            cuboids: cuboids.map(cuboid => cuboid.serialize(textureIds))
-        };
+        const object: SerializedBlockModel = {};
+        if(remappedTextures.size > 0) object.textures = Object.fromEntries(remappedTextures.entries()
+            .map(
+                ([
+                    id,
+                    texture
+                ]) => ([
+                    id,
+                    { fileName: texture.getAsBlockTextureId(this.mod).toString() }
+                ])
+            )
+        );
+        if(cuboids.length > 0) object.cuboids = cuboids.map(cuboid => cuboid.serialize(textureIds));
 
         if(this.cullsSelf != null) object.cullsSelf = this.cullsSelf;
         if(this.transparent != null) object.isTransparent = this.transparent;
 
         if(this.parent != null) {
             if(this.parent instanceof BlockModel) {
-                object.parent = this.parent.id.toString();
+                object.parent = this.parent.getBlockModelId().toString();
             } else if(this.parent instanceof Identifier) {
-                object.parent = this.parent.toString();
+                object.parent = this.parent.derive("models/blocks/" + this.parent.getItem() + ".json").toString();
             } else {
                 object.parent = this.parent;
             }

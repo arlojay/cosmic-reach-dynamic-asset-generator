@@ -60,8 +60,8 @@ export declare class BlockModelCuboid {
     getUsedTextures(): Set<Texture>;
 }
 export declare class SerializedBlockModel {
-    textures: Record<string, SerializedBlockTexture>;
-    cuboids: SerializedBlockModelCuboid[];
+    textures?: Record<string, SerializedBlockTexture>;
+    cuboids?: SerializedBlockModelCuboid[];
     cullsSelf?: boolean;
     isTransparent?: boolean;
     parent?: string;
@@ -69,6 +69,7 @@ export declare class SerializedBlockModel {
 export declare class BlockModel {
     private mod;
     private cuboids;
+    private textureOverrides;
     id: Identifier;
     cullsSelf: boolean;
     transparent: boolean;
@@ -81,6 +82,9 @@ export declare class BlockModel {
     addCuboid(...cuboids: BlockModelCuboid[]): void;
     removeCuboid(...cuboids: BlockModelCuboid[]): void;
     getCuboids(): BlockModelCuboid[];
+    addTextureOverride(texture: Texture, id: string): void;
+    removeTextureOverride(texture: Texture | string): void;
+    getTextureOverrides(): Map<string, Texture>;
     clone(newId: string): BlockModel;
     addModel(...models: BlockModel[]): void;
     applyTransformation(transformation: Matrix4): void;
