@@ -4,6 +4,7 @@ export declare class Direction {
     name: string;
     vector: Vector3;
     constructor(name: string, x: number, y: number, z: number);
+    array(): number[];
     [Symbol.iterator](): Generator<number, void, unknown>;
     setDirectionMap(directionMap: DirectionMap): void;
     get x(): number;
@@ -17,6 +18,8 @@ export declare class Direction {
 export declare class DirectionList {
     directions: Set<Direction>;
     constructor(directions?: Direction[]);
+    array(): Direction[];
+    exclude(direction: Direction): Generator<Direction, void, unknown>;
     [Symbol.iterator](): Generator<Direction, void, unknown>;
     add(direction: Direction): void;
     remove(direction: Direction): void;
@@ -33,6 +36,7 @@ export declare class DirectionList {
 export declare class DirectionMap {
     directions: Map<string, Direction>;
     constructor(directions?: Direction[]);
+    array(): Direction[];
     [Symbol.iterator](): Generator<Direction, void, unknown>;
     addDirection(direction: Direction): void;
     getDirection(name: string): Direction;
@@ -40,6 +44,7 @@ export declare class DirectionMap {
     keys(): MapIterator<string>;
     inverse(direction: Direction): Direction;
     vectorToDirection(vector: Vector3): Direction;
+    all(): DirectionList;
     combinations(): DirectionList[];
 }
 export declare class Directions {

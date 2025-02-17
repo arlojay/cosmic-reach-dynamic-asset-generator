@@ -10,6 +10,9 @@ class Direction {
         this.name = name;
         this.vector = new three_1.Vector3(x, y, z);
     }
+    array() {
+        return Array.from(this);
+    }
     *[Symbol.iterator]() {
         yield* this.vector.toArray();
     }
@@ -43,6 +46,15 @@ class DirectionList {
     directions;
     constructor(directions = []) {
         this.directions = new Set(directions);
+    }
+    array() {
+        return Array.from(this);
+    }
+    *exclude(direction) {
+        for (const otherDirection of this) {
+            if (otherDirection != direction)
+                yield otherDirection;
+        }
     }
     *[Symbol.iterator]() {
         yield* this.directions;
@@ -96,6 +108,9 @@ class DirectionMap {
             this.addDirection(direction);
         }
     }
+    array() {
+        return Array.from(this);
+    }
     *[Symbol.iterator]() {
         yield* this.directions.values();
     }
@@ -122,6 +137,9 @@ class DirectionMap {
             return distance < closest.distance ? { direction: dir, distance } : closest;
         }, { direction: null, distance: Infinity }).direction;
     }
+    all() {
+        return new DirectionList(this.array());
+    }
     combinations() {
         const keys = Array.from(this.directions.keys());
         const totalCombinations = 2 ** keys.length;
@@ -139,12 +157,12 @@ class Directions {
         return direction.toLowerCase();
     }
     static cardinals = new DirectionMap([
-        new Direction("north", 0, 0, 1),
+        new Direction("north", 0, 0, -1),
         new Direction("east", 1, 0, 0),
-        new Direction("south", 0, 0, -1),
+        new Direction("south", 0, 0, 1),
         new Direction("west", -1, 0, 0),
         new Direction("up", 0, 1, 0),
-        new Direction("down", 0, -1, 0)
+        new Direction("down", 0, -1, 0),
     ]);
     static relative = new DirectionMap([
         new Direction("front", 0, 0, 1),
