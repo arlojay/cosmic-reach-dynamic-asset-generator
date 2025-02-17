@@ -8,16 +8,6 @@ class TriggerPredicate {
 }
 exports.TriggerPredicate = TriggerPredicate;
 class LogicPredicate extends TriggerPredicate {
-    constructor(predicate) {
-        if ("not" in predicate) {
-            super({
-                and: [{ not: predicate.not }, ...(predicate.and ?? [])]
-            });
-        }
-        else {
-            super(predicate);
-        }
-    }
 }
 exports.LogicPredicate = LogicPredicate;
 class BlockEventPredicate extends TriggerPredicate {

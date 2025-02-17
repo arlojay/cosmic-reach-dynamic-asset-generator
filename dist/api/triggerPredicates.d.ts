@@ -2,7 +2,6 @@ export declare class TriggerPredicate<T> {
     constructor(predicate?: T);
 }
 export declare class LogicPredicate extends TriggerPredicate<ILogicPredicate> {
-    constructor(predicate: ILogicPredicate);
 }
 export interface ILogicPredicate {
     or?: TriggerPredicate<any>[];

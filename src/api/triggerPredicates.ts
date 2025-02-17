@@ -5,15 +5,16 @@ export class TriggerPredicate<T> {
 }
 
 export class LogicPredicate extends TriggerPredicate<ILogicPredicate> {
-    public constructor(predicate: ILogicPredicate) {
-        if("not" in predicate) {
-            super({
-                and: [ { not: predicate.not }, ...(predicate.and ?? []) ]
-            })
-        } else {
-            super(predicate);
-        }
-    }
+    // public constructor(predicate: ILogicPredicate) {
+    //     if("not" in predicate) {
+    //         super({
+    //             ...predicate,
+    //             not: [ predicate.not ]
+    //         })
+    //     } else {
+    //         super(predicate);
+    //     }
+    // }
 }
 export interface ILogicPredicate {
     or?: TriggerPredicate<any>[];
