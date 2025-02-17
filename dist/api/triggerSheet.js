@@ -53,10 +53,10 @@ class TriggerSheet {
         };
         if (this.parent != null) {
             if (this.parent instanceof TriggerSheet) {
-                object.parent = this.parent.id.toString();
+                object.parent = this.parent.getTriggerSheetId().toString();
             }
             else if (this.parent instanceof identifier_1.Identifier) {
-                object.parent = this.parent.toString();
+                object.parent = this.parent.derive("block_events/" + this.parent.getItem() + ".json").toString();
             }
             else {
                 object.parent = this.parent;
