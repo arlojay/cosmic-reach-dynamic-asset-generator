@@ -1,10 +1,10 @@
 import { Block } from "./block";
 import { BlockModel } from "./blockModel";
 import { Identifier } from "./identifier";
-import { LangKey } from "./lang";
 import { Texture } from "./texture";
 import { Mod } from "./mod";
 import { TriggerSheet } from "./triggerSheet";
+import { LangKey, LangKeyLanguage } from "./lang";
 
 export interface SerializedBlockState {
     modelName: string;
@@ -76,8 +76,8 @@ export class BlockState {
     }
 
     public createBlockModel(id?: string) {
-        const model = this.mod.createBlockModel(id ?? (
-            this.block.id.getItem() + "•" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_"))
+        const model = this.mod.createBlockModel(id ?? 
+            (this.block.id.getItem() + "•" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_"))
         );
 
         this.model = model;
@@ -108,6 +108,16 @@ export class BlockState {
             if(v[1] == null || v[1].length == 0) return v[0];
             return v.join("=");
         }).join(",");
+    }
+
+    public createLangKey() {
+        const id = this.block.id.getItem() + "::" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_");
+        this.langKey = this.mod.langMap.createBlockKey(id);
+        return this.langKey;
+    }
+
+    public setLangKey(key: LangKey) {
+        this.langKey = key;
     }
 
     public serialize(): SerializedBlockState {
@@ -152,7 +162,7 @@ export class BlockState {
         if(this.bounciness != null) object.bounciness = this.bounciness;
         if(this.hardness != null) object.hardness = this.hardness;
 
-        if(this.langKey != null) object.langKey = this.langKey;
+        if(this.langKey != null) object.langKey = this.langKey.toString();
 
         return object;
     }

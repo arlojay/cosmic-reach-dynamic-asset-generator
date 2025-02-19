@@ -1,6 +1,9 @@
 import { Block } from "./block";
 import { BlockModel } from "./blockModel";
+import { Crafting } from "./crafting";
 import { Identifier } from "./identifier";
+import { Item } from "./item";
+import { LangMap } from "./lang";
 import { TriggerSheet } from "./triggerSheet";
 
 export class Mod {
@@ -8,6 +11,9 @@ export class Mod {
     public blocks: Set<Block> = new Set;
     public blockModels: Set<BlockModel> = new Set;
     public triggerSheets: Set<TriggerSheet> = new Set;
+    public items: Set<Item> = new Set;
+    public langMap: LangMap = new LangMap(this);
+    public crafting: Crafting = new Crafting(this);
 
     constructor(id: string) {
         this.id = id;
@@ -35,5 +41,20 @@ export class Mod {
         this.triggerSheets.add(triggerSheet);
 
         return triggerSheet;
+    }
+
+    public createItem(id: string): Item {
+        const item = new Item(this, new Identifier(this, id));
+
+        this.items.add(item);
+
+        return item;
+    }
+
+    public createCraftingRecipe(id: string) {
+        return this.crafting.createCraftingRecipe(id);
+    }
+    public createFurnaceRecipe(id: string) {
+        return this.crafting.createFurnaceRecipe(id);
     }
 }

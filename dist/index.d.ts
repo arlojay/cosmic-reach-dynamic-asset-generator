@@ -14,3 +14,8 @@ export * from "./api/triggerActions";
 export * from "./api/triggerPredicates";
 export * from "./api/triggerSheet";
 export * from "./api/writer";
+export * from "./api/crafting";
+export * from "./api/craftingRecipe";
+export * from "./api/furnaceRecipe";
+export * from "./api/item";
+export * from "./api/semantics";

@@ -30,3 +30,8 @@ __exportStar(require("./api/triggerActions"), exports);
 __exportStar(require("./api/triggerPredicates"), exports);
 __exportStar(require("./api/triggerSheet"), exports);
 __exportStar(require("./api/writer"), exports);
+__exportStar(require("./api/crafting"), exports);
+__exportStar(require("./api/craftingRecipe"), exports);
+__exportStar(require("./api/furnaceRecipe"), exports);
+__exportStar(require("./api/item"), exports);
+__exportStar(require("./api/semantics"), exports);

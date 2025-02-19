@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ItemDropAction = exports.CycleBlockStateParamsAction = exports.SetBlockStateParamsAction = exports.ReplaceBlockStateAction = exports.RunTriggerAction = exports.TriggerAction = void 0;
+exports.ItemDropAction = exports.CustomAction = exports.CycleBlockStateParamsAction = exports.SetBlockStateParamsAction = exports.ReplaceBlockStateAction = exports.RunTriggerAction = exports.TriggerAction = void 0;
 class TriggerAction {
     name;
     condition;
@@ -40,6 +40,13 @@ class CycleBlockStateParamsAction extends TriggerAction {
     name = "base:cycle_block_state_params";
 }
 exports.CycleBlockStateParamsAction = CycleBlockStateParamsAction;
+class CustomAction extends TriggerAction {
+    constructor(name, params) {
+        super(params);
+        this.name = name;
+    }
+}
+exports.CustomAction = CustomAction;
 class ItemDropAction extends TriggerAction {
     name = "base:item_drop";
 }

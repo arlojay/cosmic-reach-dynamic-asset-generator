@@ -68,6 +68,14 @@ export class CycleBlockStateParamsAction extends TriggerAction<{
     public name: string = "base:cycle_block_state_params";
 }
 
+export class CustomAction extends TriggerAction<{}> {
+    public constructor(name: string, params: Record<string, any>) {
+        super(params);
+
+        this.name = name;
+    }
+}
+
 export class ItemDropAction extends TriggerAction<{
     position: [ number, number, number ]
 }> {

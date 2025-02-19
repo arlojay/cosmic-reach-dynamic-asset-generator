@@ -1,5 +1,6 @@
 import { BlockState, SerializedBlockState } from "./blockState";
 import { Identifier } from "./identifier";
+import { LangKey } from "./lang";
 import { Mod } from "./mod";
 
 type BlockEntity = null;
@@ -25,6 +26,7 @@ export class Block {
     
     private blockStates: Set<BlockState> = new Set;
     private blockEntity: BlockEntity | null = null;
+    private defaultLangKey: LangKey | null = null;
 
     constructor(mod: Mod, id: Identifier) {
         this.id = id;
@@ -54,6 +56,10 @@ export class Block {
             }
         }
 
+        if(this.defaultLangKey != null) {
+            blockState.setLangKey(this.defaultLangKey);
+        }
+
         return blockState;
     }
 
@@ -63,6 +69,15 @@ export class Block {
 
     public getStates() {
         return new Set(this.blockStates);
+    }
+
+    public createDefaultLangKey() {
+        const key = this.mod.langMap.createBlockKey(this.id.getItem());
+        this.defaultLangKey = key;
+        return key;
+    }
+    public setDefaultLangKey(langKey: LangKey) {
+        this.defaultLangKey = langKey;
     }
 
     public serialize() {

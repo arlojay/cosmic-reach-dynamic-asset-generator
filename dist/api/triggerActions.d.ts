@@ -45,6 +45,9 @@ export declare class CycleBlockStateParamsAction extends TriggerAction<{
 }> {
     name: string;
 }
+export declare class CustomAction extends TriggerAction<{}> {
+    constructor(name: string, params: Record<string, any>);
+}
 export declare class ItemDropAction extends TriggerAction<{
     position: [number, number, number];
 }> {

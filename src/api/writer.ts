@@ -6,6 +6,8 @@ import { TriggerSheet } from "./triggerSheet";
 import { Texture } from "./texture";
 import { Stream } from "node:stream";
 import { Image } from "canvas";
+import { LangKey, LangKeyLanguage } from "./lang";
+import { $enum } from "ts-enum-util";
 
 function* joinIterators<T>(iterator1: Iterable<T>, iterator2: Iterable<T>) {
     yield* iterator1;
@@ -59,6 +61,7 @@ export class Writer {
         const usedBlockModels: Set<BlockModel> = new Set;
         const usedTriggerSheets: Set<TriggerSheet> = new Set;
         const writtenBlockTextures: Set<Texture> = new Set;
+        const writtenItemTextures: Set<Texture> = new Set;
 
         for(const block of this.mod.blocks) {
             const blockPath = path.join(directory, block.getBlockPath());
@@ -66,6 +69,8 @@ export class Writer {
             for(const state of block.getStates()) {
                 usedBlockModels.add(state.model);
                 usedTriggerSheets.add(state.triggerSheet);
+
+                if(state.langKey != null) this.mod.langMap.addBlockKey(state.langKey);
             }
 
             this.writeFile(blockPath, block.serialize());
@@ -123,6 +128,56 @@ export class Writer {
             if(!usedTriggerSheets.has(triggerSheet)) continue;
 
             this.writeFile(triggerSheetPath, triggerSheet.serialize());
+        }
+
+        for(const item of this.mod.items) {
+            const itemPath = path.join(directory, item.getItemPath());
+
+            if(item.langKey != null) this.mod.langMap.addItemKey(item.langKey);
+            
+            const texture = item.texture;
+
+            if(texture.texture instanceof Image) {
+                if(!writtenBlockTextures.has(texture)) this.writeFile(
+                    path.join(directory, texture.getAsItemTexturePath()),
+                    texture.createTextureStream()
+                );
+            }
+
+            writtenBlockTextures.add(texture);
+
+            this.writeFile(itemPath, item.serialize());
+        }
+
+        for(const craftingRecipe of this.mod.crafting.craftingRecipes) {
+            this.writeFile(
+                path.join(directory, craftingRecipe.getRecipePath().toString()),
+                craftingRecipe.serialize()
+            );
+        }
+        for(const furnaceRecipe of this.mod.crafting.furnaceRecipes) {
+            this.writeFile(
+                path.join(directory, furnaceRecipe.getRecipePath().toString()),
+                furnaceRecipe.serialize()
+            );
+        }
+
+        const langMap = this.mod.langMap.serialize();
+
+        for(const languageType of $enum(LangKeyLanguage).values()) {
+            const languageName = $enum(LangKeyLanguage).getKeyOrThrow(languageType);
+            const language = langMap[languageType];
+
+            if(language == null) continue;
+
+            this.writeFile(
+                path.join(directory, "lang", languageName, this.mod.id + "_items.json"),
+                language.items
+            );
+            this.writeFile(
+                path.join(directory, "lang", languageName, this.mod.id + "_blocks.json"),
+                language.blocks
+            );
         }
     }
 }

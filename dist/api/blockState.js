@@ -35,7 +35,8 @@ class BlockState {
         this.block = block;
     }
     createBlockModel(id) {
-        const model = this.mod.createBlockModel(id ?? (this.block.id.getItem() + "•" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_")));
+        const model = this.mod.createBlockModel(id ??
+            (this.block.id.getItem() + "•" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_")));
         this.model = model;
         return model;
     }
@@ -57,6 +58,14 @@ class BlockState {
                 return v[0];
             return v.join("=");
         }).join(",");
+    }
+    createLangKey() {
+        const id = this.block.id.getItem() + "::" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_");
+        this.langKey = this.mod.langMap.createBlockKey(id);
+        return this.langKey;
+    }
+    setLangKey(key) {
+        this.langKey = key;
     }
     serialize() {
         const object = {
@@ -114,7 +123,7 @@ class BlockState {
         if (this.hardness != null)
             object.hardness = this.hardness;
         if (this.langKey != null)
-            object.langKey = this.langKey;
+            object.langKey = this.langKey.toString();
         return object;
     }
     getFullId() {

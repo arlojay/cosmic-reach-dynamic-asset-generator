@@ -10,6 +10,7 @@ class Block {
     fallbackParams = null;
     blockStates = new Set;
     blockEntity = null;
+    defaultLangKey = null;
     constructor(mod, id) {
         this.id = id;
         this.mod = mod;
@@ -37,6 +38,9 @@ class Block {
                 }
             }
         }
+        if (this.defaultLangKey != null) {
+            blockState.setLangKey(this.defaultLangKey);
+        }
         return blockState;
     }
     createBlockEntity() {
@@ -44,6 +48,14 @@ class Block {
     }
     getStates() {
         return new Set(this.blockStates);
+    }
+    createDefaultLangKey() {
+        const key = this.mod.langMap.createBlockKey(this.id.getItem());
+        this.defaultLangKey = key;
+        return key;
+    }
+    setDefaultLangKey(langKey) {
+        this.defaultLangKey = langKey;
     }
     serialize() {
         const blockStates = {};

@@ -1,10 +1,10 @@
 import { Block } from "./block";
 import { BlockModel } from "./blockModel";
 import { Identifier } from "./identifier";
-import { LangKey } from "./lang";
 import { Texture } from "./texture";
 import { Mod } from "./mod";
 import { TriggerSheet } from "./triggerSheet";
+import { LangKey } from "./lang";
 export interface SerializedBlockState {
     modelName: string;
     blockEventsId?: string;
@@ -71,6 +71,8 @@ export declare class BlockState {
     createTriggerSheet(id?: string): TriggerSheet;
     setTriggerSheet(triggerSheet: TriggerSheet): void;
     compileParams(): string;
+    createLangKey(): LangKey;
+    setLangKey(key: LangKey): void;
     serialize(): SerializedBlockState;
     getFullId(): string;
 }
