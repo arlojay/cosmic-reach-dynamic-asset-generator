@@ -165,9 +165,9 @@ class Directions {
         new Direction("down", 0, -1, 0),
     ]);
     static relative = new DirectionMap([
-        new Direction("front", 0, 0, 1),
+        new Direction("front", 0, 0, -1),
         new Direction("right", 1, 0, 0),
-        new Direction("back", 0, 0, -1),
+        new Direction("back", 0, 0, 1),
         new Direction("left", -1, 0, 0),
         new Direction("top", 0, 1, 0),
         new Direction("bottom", 0, -1, 0)
@@ -176,6 +176,12 @@ class Directions {
         new Direction("front", 0, 0, 1),
         new Direction("back", 0, 0, -1),
         new Direction("side", 0, 0, 0)
+    ]);
+    static nativeRotation = new DirectionMap([
+        new Direction("NegX", -1, 0, 0),
+        new Direction("PosX", 1, 0, 0),
+        new Direction("NegZ", 0, 0, -1),
+        new Direction("PosZ", 0, 0, 1),
     ]);
 }
 exports.Directions = Directions;
