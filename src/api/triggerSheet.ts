@@ -62,7 +62,7 @@ export class TriggerSheet {
         }
 
         const object: SerializedTriggerSheet = {
-            stringId: this.id.toString(),
+            stringId: this.getTriggerSheetId(),
             triggers: allTriggers
         };
 
@@ -83,6 +83,6 @@ export class TriggerSheet {
         return "block_events/" + this.id.getItem() + ".json";
     }
     public getTriggerSheetId() {
-        return this.id.toString();
+        return this.id.toString().replace(/\//g, "•");
     }
 }

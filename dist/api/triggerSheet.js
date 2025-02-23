@@ -48,7 +48,7 @@ class TriggerSheet {
             allTriggers[id] = triggers.map(v => v.serialize());
         }
         const object = {
-            stringId: this.id.toString(),
+            stringId: this.getTriggerSheetId(),
             triggers: allTriggers
         };
         if (this.parent != null) {
@@ -68,7 +68,7 @@ class TriggerSheet {
         return "block_events/" + this.id.getItem() + ".json";
     }
     getTriggerSheetId() {
-        return this.id.toString();
+        return this.id.toString().replace(/\//g, "•");
     }
 }
 exports.TriggerSheet = TriggerSheet;

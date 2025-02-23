@@ -36,7 +36,7 @@ class BlockState {
     }
     createBlockModel(id) {
         const model = this.mod.createBlockModel(id ??
-            (this.block.id.getItem() + "•" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_")));
+            (this.block.id.getItem() + "/" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_")));
         this.model = model;
         return model;
     }
@@ -45,7 +45,7 @@ class BlockState {
     }
     createTriggerSheet(id) {
         const triggerSheet = this.mod.createTriggerSheet(id ??
-            (this.block.id.getItem() + "•" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_")));
+            (this.block.id.getItem() + "/" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_")));
         this.triggerSheet = triggerSheet;
         return triggerSheet;
     }
