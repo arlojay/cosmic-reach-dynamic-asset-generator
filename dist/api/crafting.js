@@ -12,7 +12,7 @@ function itemLikeToString(item) {
         return item.id.toString();
     if (item instanceof blockState_1.BlockState)
         return item.getFullId();
-    return item.toString();
+    return item?.toString?.() ?? `${item}`;
 }
 class Crafting {
     mod;

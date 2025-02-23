@@ -23,6 +23,8 @@ export class ShapedCraftingRecipe implements CraftingRecipe<SerializedCraftingRe
     public resultCount: number = 1;
 
     public setIngredientAt(x: number, y: number, ingredient: ItemLike) {
+        if(ingredient == null) throw new TypeError("Ingredient cannot be null");
+
         this.items.set(x + " " + y, ingredient);
     }
     public getIngredientAt(x: number, y: number): ItemLike | null {
@@ -109,6 +111,7 @@ export class ShapelessCraftingRecipe implements CraftingRecipe<SerializedShapele
     public resultCount: number = 1;
 
     public addItem(item: ItemLike, count: number = 1) {
+        if(item == null) throw new TypeError("Ingredient cannot be null");
         this.items.add({ item, count });
     }
 

@@ -10,7 +10,7 @@ export type ItemLike = Item | BlockState | Identifier | string;
 export function itemLikeToString(item: ItemLike) {
     if(item instanceof Item) return item.id.toString();
     if(item instanceof BlockState) return item.getFullId();
-    return item.toString();
+    return item?.toString?.() ?? `${item}`;
 }
 
 export class Crafting {

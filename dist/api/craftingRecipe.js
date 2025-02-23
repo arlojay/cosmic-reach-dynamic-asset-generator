@@ -8,6 +8,8 @@ class ShapedCraftingRecipe {
     result = null;
     resultCount = 1;
     setIngredientAt(x, y, ingredient) {
+        if (ingredient == null)
+            throw new TypeError("Ingredient cannot be null");
         this.items.set(x + " " + y, ingredient);
     }
     getIngredientAt(x, y) {
@@ -70,6 +72,8 @@ class ShapelessCraftingRecipe {
     result = null;
     resultCount = 1;
     addItem(item, count = 1) {
+        if (item == null)
+            throw new TypeError("Ingredient cannot be null");
         this.items.add({ item, count });
     }
     setResult(ingredient, count = this.resultCount) {
