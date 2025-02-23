@@ -19,7 +19,7 @@ export declare class DirectionList {
     directions: Set<Direction>;
     constructor(directions?: Direction[]);
     array(): Direction[];
-    exclude(direction: Direction): Generator<Direction, void, unknown>;
+    exclude(...directions: Direction[]): Generator<Direction, void, unknown>;
     [Symbol.iterator](): Generator<Direction, void, unknown>;
     add(direction: Direction): void;
     remove(direction: Direction): void;

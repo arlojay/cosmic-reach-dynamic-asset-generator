@@ -62,9 +62,9 @@ export class DirectionList {
         return Array.from(this);
     }
 
-    *exclude(direction: Direction) {
+    *exclude(...directions: Direction[]) {
         for(const otherDirection of this) {
-            if(otherDirection != direction) yield otherDirection;
+            if(!directions.includes(otherDirection)) yield otherDirection;
         }
     }
 

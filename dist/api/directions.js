@@ -50,9 +50,9 @@ class DirectionList {
     array() {
         return Array.from(this);
     }
-    *exclude(direction) {
+    *exclude(...directions) {
         for (const otherDirection of this) {
-            if (otherDirection != direction)
+            if (!directions.includes(otherDirection))
                 yield otherDirection;
         }
     }
