@@ -1,17 +1,15 @@
 import { Canvas, Image, createCanvas, loadImage } from "canvas";
 import { Texture } from "./texture";
 
+export enum ColorizedTextureMethod { MIX, SOFT_LIGHT }
+
 export class ColorizedTexture {
     public whiteTexture: Canvas;
     public blackTexture: Canvas;
+    public colorMethod: ColorizedTextureMethod = ColorizedTextureMethod.MIX;
     
     static async createFromFiles(whiteSource: string, blackSource: string): Promise<ColorizedTexture> {
         return new ColorizedTexture(await loadImage(whiteSource), await loadImage(blackSource));
-    }
-    
-    constructor(whiteTexture: Image, blackTexture: Image) {
-        this.whiteTexture = ColorizedTexture.imageToCanvas(whiteTexture);
-        this.blackTexture = ColorizedTexture.imageToCanvas(blackTexture);
     }
     
     private static imageToCanvas(image: Image): Canvas {
@@ -21,7 +19,27 @@ export class ColorizedTexture {
         return canvas;
     }
     
-    async createTexture(name: string, r: number, g: number, b: number, a: number = 0.5): Promise<Texture> {
+    constructor(whiteTexture: Image, blackTexture: Image) {
+        this.whiteTexture = ColorizedTexture.imageToCanvas(whiteTexture);
+        this.blackTexture = ColorizedTexture.imageToCanvas(blackTexture);
+    }
+
+    public setColorMethod(newMethod: ColorizedTextureMethod) {
+        this.colorMethod = newMethod;
+    }
+
+    private composite(white: number, black: number, intensity: number) {
+        if(this.colorMethod == ColorizedTextureMethod.MIX) {
+            return (white - black) * intensity + black;
+        }
+        if(this.colorMethod == ColorizedTextureMethod.SOFT_LIGHT) {
+            return ((1 - 2 * intensity) * (white * white) + 2 * intensity * white);
+        }
+
+        return (white + black) / 2;
+    }
+    
+    async createTexture(name: string, r: number, g: number, b: number, a: number = 1): Promise<Texture> {
         const canvas = createCanvas(this.whiteTexture.width, this.whiteTexture.height);
         const context = canvas.getContext("2d");
 
@@ -31,10 +49,10 @@ export class ColorizedTexture {
 
         for (let y = 0, i = 0; y < canvas.height; y++) {
             for (let x = 0; x < canvas.width; x++, i += 4) {
-                newData.data[i + 0] = (whiteData.data[i + 0] - blackData.data[i + 0]) * r + blackData.data[i + 0];
-                newData.data[i + 1] = (whiteData.data[i + 1] - blackData.data[i + 1]) * g + blackData.data[i + 1];
-                newData.data[i + 2] = (whiteData.data[i + 2] - blackData.data[i + 2]) * b + blackData.data[i + 2];
-                newData.data[i + 3] = (whiteData.data[i + 3] - blackData.data[i + 3]) * a + blackData.data[i + 3];
+                newData.data[i + 0] = Math.floor(this.composite(whiteData.data[i + 0] / 255, blackData.data[i + 0] / 255, r) * 255.999);
+                newData.data[i + 1] = Math.floor(this.composite(whiteData.data[i + 1] / 255, blackData.data[i + 1] / 255, g) * 255.999);
+                newData.data[i + 2] = Math.floor(this.composite(whiteData.data[i + 2] / 255, blackData.data[i + 2] / 255, b) * 255.999);
+                newData.data[i + 3] = Math.floor(this.composite(whiteData.data[i + 3] / 255, blackData.data[i + 3] / 255, a) * 255.999);
             }
         }
 
