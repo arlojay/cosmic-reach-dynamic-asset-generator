@@ -19,8 +19,10 @@ function* joinIterators(iterator1, iterator2) {
 class Writer {
     mod;
     checkedFolders = new Array;
-    constructor(mod) {
+    minifyJson;
+    constructor(mod, minifyJson = false) {
         this.mod = mod;
+        this.minifyJson = minifyJson;
     }
     makePathToFile(file) {
         const tree = file.split(/[\/\\]/g).slice(0, -1);
@@ -42,7 +44,7 @@ class Writer {
             data.pipe(node_fs_1.default.createWriteStream(file));
         }
         else if (typeof data == "object") {
-            node_fs_1.default.writeFileSync(file, JSON.stringify(data, null, 4));
+            node_fs_1.default.writeFileSync(file, this.minifyJson ? JSON.stringify(data) : JSON.stringify(data, null, 4));
         }
         else {
             node_fs_1.default.writeFileSync(file, data);

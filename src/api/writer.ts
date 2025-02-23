@@ -17,9 +17,11 @@ function* joinIterators<T>(iterator1: Iterable<T>, iterator2: Iterable<T>) {
 export class Writer {
     private mod: Mod;
     private checkedFolders: string[] = new Array;
+    public minifyJson: boolean;
 
-    constructor(mod: Mod) {
+    constructor(mod: Mod, minifyJson: boolean = false) {
         this.mod = mod;
+        this.minifyJson = minifyJson;
     }
 
     private makePathToFile(file: string) {
@@ -43,7 +45,7 @@ export class Writer {
         if(data instanceof Stream) {
             data.pipe(fs.createWriteStream(file));
         } else if(typeof data == "object") {
-            fs.writeFileSync(file, JSON.stringify(data, null, 4));
+            fs.writeFileSync(file, this.minifyJson ? JSON.stringify(data) : JSON.stringify(data, null, 4));
         } else {
             fs.writeFileSync(file, data);
         }
