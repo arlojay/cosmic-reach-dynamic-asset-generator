@@ -12,6 +12,7 @@ const node_stream_1 = require("node:stream");
 const canvas_1 = require("canvas");
 const lang_1 = require("./lang");
 const ts_enum_util_1 = require("ts-enum-util");
+const node_util_1 = require("node:util");
 function* joinIterators(iterator1, iterator2) {
     yield* iterator1;
     yield* iterator2;
@@ -40,14 +41,20 @@ class Writer {
     }
     writeFile(file, data) {
         this.makePathToFile(file);
-        if (data instanceof node_stream_1.Stream) {
-            data.pipe(node_fs_1.default.createWriteStream(file));
+        try {
+            if (data instanceof node_stream_1.Stream) {
+                data.pipe(node_fs_1.default.createWriteStream(file));
+            }
+            else if (typeof data == "object") {
+                node_fs_1.default.writeFileSync(file, this.minifyJson ? JSON.stringify(data) : JSON.stringify(data, null, 4));
+            }
+            else {
+                node_fs_1.default.writeFileSync(file, data);
+            }
         }
-        else if (typeof data == "object") {
-            node_fs_1.default.writeFileSync(file, this.minifyJson ? JSON.stringify(data) : JSON.stringify(data, null, 4));
-        }
-        else {
-            node_fs_1.default.writeFileSync(file, data);
+        catch (e) {
+            console.error(e);
+            console.log((0, node_util_1.inspect)(data, false, 8));
         }
     }
     write(modFolder, keepOldFolder = false) {
@@ -63,11 +70,14 @@ class Writer {
         const usedTriggerSheets = new Set;
         const writtenBlockTextures = new Set;
         const writtenItemTextures = new Set;
+        const writtenSounds = new Set;
         for (const block of this.mod.blocks) {
             const blockPath = node_path_1.default.join(directory, block.getBlockPath());
             for (const state of block.getStates()) {
-                usedBlockModels.add(state.model);
-                usedTriggerSheets.add(state.triggerSheet);
+                if (state.model != null)
+                    usedBlockModels.add(state.model);
+                if (state.triggerSheet != null)
+                    usedTriggerSheets.add(state.triggerSheet);
                 if (state.langKey != null)
                     this.mod.langMap.addBlockKey(state.langKey);
             }
@@ -76,21 +86,21 @@ class Writer {
         let includedBlockModels = 0;
         do {
             includedBlockModels = 0;
-            for (const triggerSheet of this.mod.blockModels) {
-                if (!usedBlockModels.has(triggerSheet))
+            for (const blockModel of this.mod.blockModels) {
+                if (!usedBlockModels.has(blockModel))
                     continue;
-                if (!(triggerSheet.parent instanceof blockModel_1.BlockModel))
+                if (!(blockModel.parent instanceof blockModel_1.BlockModel))
                     continue;
-                if (usedBlockModels.has(triggerSheet.parent))
-                    continue;
-                usedBlockModels.add(triggerSheet.parent);
+                if (blockModel.parent != null) {
+                    if (usedBlockModels.has(blockModel.parent))
+                        continue;
+                    usedBlockModels.add(blockModel.parent);
+                }
                 includedBlockModels++;
             }
         } while (includedBlockModels > 0);
-        for (const blockModel of this.mod.blockModels) {
+        for (const blockModel of usedBlockModels) {
             const modelPath = node_path_1.default.join(directory, blockModel.getBlockModelPath());
-            if (!usedBlockModels.has(blockModel))
-                continue;
             for (const texture of joinIterators(blockModel.getUsedTextures().values(), blockModel.getTextureOverrides().values())) {
                 if (writtenBlockTextures.has(texture))
                     continue;
@@ -109,17 +119,26 @@ class Writer {
                     continue;
                 if (!(triggerSheet.parent instanceof triggerSheet_1.TriggerSheet))
                     continue;
-                if (usedTriggerSheets.has(triggerSheet.parent))
-                    continue;
-                usedTriggerSheets.add(triggerSheet.parent);
+                if (triggerSheet.parent != null) {
+                    if (usedTriggerSheets.has(triggerSheet.parent))
+                        continue;
+                    usedTriggerSheets.add(triggerSheet.parent);
+                }
                 includedTriggerSheets++;
             }
         } while (includedTriggerSheets > 0);
-        for (const triggerSheet of this.mod.triggerSheets) {
+        for (const triggerSheet of usedTriggerSheets) {
             const triggerSheetPath = node_path_1.default.join(directory, triggerSheet.getTriggerSheetPath());
             if (!usedTriggerSheets.has(triggerSheet))
                 continue;
             this.writeFile(triggerSheetPath, triggerSheet.serialize());
+            const sounds = triggerSheet.getAllSoundInstances();
+            for (const sound of sounds) {
+                if (writtenSounds.has(sound))
+                    continue;
+                const soundsPath = node_path_1.default.join(directory, sound.getAsBlockSoundPath());
+                this.writeFile(soundsPath, sound.createOggStream());
+            }
         }
         for (const item of this.mod.items) {
             const itemPath = node_path_1.default.join(directory, item.getItemPath());
@@ -127,10 +146,10 @@ class Writer {
                 this.mod.langMap.addItemKey(item.langKey);
             const texture = item.texture;
             if (texture.texture instanceof canvas_1.Image) {
-                if (!writtenBlockTextures.has(texture))
+                if (!writtenItemTextures.has(texture))
                     this.writeFile(node_path_1.default.join(directory, texture.getAsItemTexturePath()), texture.createTextureStream());
             }
-            writtenBlockTextures.add(texture);
+            writtenItemTextures.add(texture);
             this.writeFile(itemPath, item.serialize());
         }
         for (const craftingRecipe of this.mod.crafting.craftingRecipes) {

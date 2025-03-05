@@ -18,6 +18,9 @@ export declare class BlockModelFace {
     uvRotation: (0 | 90 | 180 | 270) | null;
     serialize(textureId: string): SerializedBlockModelFace;
     clone(): BlockModelFace;
+    flipVertical(): void;
+    flipHorizontal(): void;
+    rotate(angle: number): void;
 }
 interface SerializedBlockTexture {
     fileName: string;
@@ -58,6 +61,10 @@ export declare class BlockModelCuboid {
     clone(): BlockModelCuboid;
     serialize(textureIds: Map<Texture, string>): SerializedBlockModelCuboid;
     getUsedTextures(): Set<Texture>;
+    rotateTexturesX(amount: number): void;
+    rotateTexturesY(amount: number): void;
+    rotateTexturesZ(amount: number): void;
+    private transformFaceTextures;
 }
 export declare class SerializedBlockModel {
     textures?: Record<string, SerializedBlockTexture>;
@@ -67,6 +74,8 @@ export declare class SerializedBlockModel {
     parent?: string;
 }
 export declare class BlockModel {
+    private static tempModelsCreated;
+    private static nextTempModelName;
     private mod;
     private cuboids;
     private textureOverrides;
@@ -74,7 +83,7 @@ export declare class BlockModel {
     cullsSelf: boolean;
     transparent: boolean;
     parent: Identifier | string | BlockModel;
-    constructor(mod: Mod, id: Identifier);
+    constructor(mod?: Mod, id?: Identifier);
     setParent(parent: Identifier | string | BlockModel): void;
     getUsedTextures(): Set<Texture>;
     recalculateUVs(): void;
@@ -85,11 +94,15 @@ export declare class BlockModel {
     addTextureOverride(texture: Texture, id: string): void;
     removeTextureOverride(texture: Texture | string): void;
     getTextureOverrides(): Map<string, Texture>;
-    clone(newId: string): BlockModel;
+    clone(newId?: string): BlockModel;
     addModel(...models: BlockModel[]): void;
     applyTransformation(transformation: Matrix4): void;
     setAllTextures(texture: Texture): void;
     serialize(): SerializedBlockModel;
+    rotateX(amount: number): this;
+    rotateY(amount: number): this;
+    rotateZ(amount: number): this;
+    realize(): this;
     getBlockModelPath(): string;
     getBlockModelId(): Identifier;
 }

@@ -1,28 +1,29 @@
+import { BlockEntity } from "./blockEntity";
 import { BlockState, SerializedBlockState } from "./blockState";
 import { Identifier } from "./identifier";
 import { LangKey } from "./lang";
 import { Mod } from "./mod";
-type BlockEntity = null;
 export interface BlockProperties {
     fuelTicks: number | null;
 }
 export interface SerializedBlock {
     stringId: string;
-    defaultProperties?: SerializedBlockState;
+    defaultProperties?: Partial<SerializedBlockState>;
     blockStates: Record<string, SerializedBlockState>;
+    blockEntityId?: string;
+    blockEntityParams?: any;
 }
-export declare class Block {
+export declare class Block<BlockEntityType extends BlockEntity<any> = never> {
     id: Identifier;
     private mod;
     properties: BlockProperties;
-    defaultState: BlockState;
-    fallbackParams: BlockState;
+    fallbackParams: Partial<SerializedBlockState>;
     private blockStates;
-    private blockEntity;
+    blockEntity: BlockEntityType;
     private defaultLangKey;
     constructor(mod: Mod, id: Identifier);
     createState(blockStateString: Map<string, string> | Record<string, string> | string | null): BlockState;
-    createBlockEntity(): BlockEntity;
+    setBlockEntity(blockEntity: BlockEntityType): void;
     getStates(): Set<BlockState>;
     createDefaultLangKey(): LangKey;
     setDefaultLangKey(langKey: LangKey): void;
@@ -30,4 +31,3 @@ export declare class Block {
     getBlockPath(): string;
     getBlockId(): string;
 }
-export {};

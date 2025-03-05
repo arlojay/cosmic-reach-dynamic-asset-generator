@@ -8,6 +8,8 @@ import { Stream } from "node:stream";
 import { Image } from "canvas";
 import { LangKey, LangKeyLanguage } from "./lang";
 import { $enum } from "ts-enum-util";
+import { Sound } from "./sound";
+import { inspect } from "node:util";
 
 function* joinIterators<T>(iterator1: Iterable<T>, iterator2: Iterable<T>) {
     yield* iterator1;
@@ -42,12 +44,17 @@ export class Writer {
 
     private writeFile(file: string, data: string | object | Stream) {
         this.makePathToFile(file);
-        if(data instanceof Stream) {
-            data.pipe(fs.createWriteStream(file));
-        } else if(typeof data == "object") {
-            fs.writeFileSync(file, this.minifyJson ? JSON.stringify(data) : JSON.stringify(data, null, 4));
-        } else {
-            fs.writeFileSync(file, data);
+        try {
+            if(data instanceof Stream) {
+                data.pipe(fs.createWriteStream(file));
+            } else if(typeof data == "object") {
+                fs.writeFileSync(file, this.minifyJson ? JSON.stringify(data) : JSON.stringify(data, null, 4));
+            } else {
+                fs.writeFileSync(file, data);
+            }
+        } catch(e) {
+            console.error(e);
+            console.log(inspect(data, false, 8));
         }
     }
 
@@ -64,13 +71,14 @@ export class Writer {
         const usedTriggerSheets: Set<TriggerSheet> = new Set;
         const writtenBlockTextures: Set<Texture> = new Set;
         const writtenItemTextures: Set<Texture> = new Set;
+        const writtenSounds: Set<Sound> = new Set;
 
         for(const block of this.mod.blocks) {
             const blockPath = path.join(directory, block.getBlockPath());
 
             for(const state of block.getStates()) {
-                usedBlockModels.add(state.model);
-                usedTriggerSheets.add(state.triggerSheet);
+                if(state.model != null) usedBlockModels.add(state.model);
+                if(state.triggerSheet != null) usedTriggerSheets.add(state.triggerSheet);
 
                 if(state.langKey != null) this.mod.langMap.addBlockKey(state.langKey);
             }
@@ -81,20 +89,20 @@ export class Writer {
         let includedBlockModels = 0;
         do {
             includedBlockModels = 0;
-            for(const triggerSheet of this.mod.blockModels) {
-                if(!usedBlockModels.has(triggerSheet)) continue;
-                if(!(triggerSheet.parent instanceof BlockModel)) continue;
-                if(usedBlockModels.has(triggerSheet.parent)) continue;
+            for(const blockModel of this.mod.blockModels) {
+                if(!usedBlockModels.has(blockModel)) continue;
+                if(!(blockModel.parent instanceof BlockModel)) continue;
 
-                usedBlockModels.add(triggerSheet.parent);
+                if(blockModel.parent != null) {
+                    if(usedBlockModels.has(blockModel.parent)) continue;
+                    usedBlockModels.add(blockModel.parent);
+                }
                 includedBlockModels++;
             }
         } while(includedBlockModels > 0);
 
-        for(const blockModel of this.mod.blockModels) {
+        for(const blockModel of usedBlockModels) {
             const modelPath = path.join(directory, blockModel.getBlockModelPath());
-
-            if(!usedBlockModels.has(blockModel)) continue;
 
             for(const texture of joinIterators(blockModel.getUsedTextures().values(), blockModel.getTextureOverrides().values())) {
                 if(writtenBlockTextures.has(texture)) continue;
@@ -117,19 +125,30 @@ export class Writer {
             for(const triggerSheet of this.mod.triggerSheets) {
                 if(!usedTriggerSheets.has(triggerSheet)) continue;
                 if(!(triggerSheet.parent instanceof TriggerSheet)) continue;
-                if(usedTriggerSheets.has(triggerSheet.parent)) continue;
 
-                usedTriggerSheets.add(triggerSheet.parent);
+                if(triggerSheet.parent != null) {
+                    if(usedTriggerSheets.has(triggerSheet.parent)) continue;
+                    usedTriggerSheets.add(triggerSheet.parent);
+                }
                 includedTriggerSheets++;
             }
         } while(includedTriggerSheets > 0);
 
-        for(const triggerSheet of this.mod.triggerSheets) {
+        for(const triggerSheet of usedTriggerSheets) {
             const triggerSheetPath = path.join(directory, triggerSheet.getTriggerSheetPath());
 
             if(!usedTriggerSheets.has(triggerSheet)) continue;
 
             this.writeFile(triggerSheetPath, triggerSheet.serialize());
+
+            const sounds = triggerSheet.getAllSoundInstances();
+            for(const sound of sounds) {
+                if(writtenSounds.has(sound)) continue;
+
+                const soundsPath = path.join(directory, sound.getAsBlockSoundPath());
+
+                this.writeFile(soundsPath, sound.createOggStream());
+            }
         }
 
         for(const item of this.mod.items) {
@@ -140,13 +159,13 @@ export class Writer {
             const texture = item.texture;
 
             if(texture.texture instanceof Image) {
-                if(!writtenBlockTextures.has(texture)) this.writeFile(
+                if(!writtenItemTextures.has(texture)) this.writeFile(
                     path.join(directory, texture.getAsItemTexturePath()),
                     texture.createTextureStream()
                 );
             }
 
-            writtenBlockTextures.add(texture);
+            writtenItemTextures.add(texture);
 
             this.writeFile(itemPath, item.serialize());
         }

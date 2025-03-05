@@ -41,13 +41,13 @@ export interface SerializedBlockState {
 
 export class BlockState {
     private mod: Mod;
-    private block: Block;
+    private block: Block<any>;
 
     public params: Map<string, string> = new Map;
 
     public model: BlockModel;
     public triggerSheet: TriggerSheet = null;
-    public isOpaque: boolean = true;
+    public isOpaque: boolean | null = null; // default true
     public lightAttenuation: number | null = null; // default 15
     public canRaycastForBreak: boolean | null = null; // default true
     public canRaycastForPlaceOn: boolean | null = null; // default true
@@ -72,7 +72,7 @@ export class BlockState {
     public isFluid: boolean | null = null;
     public itemIcon: Texture | null = null;
 
-    public constructor(mod: Mod, block: Block) {
+    public constructor(mod: Mod, block: Block<any>) {
         this.mod = mod;
         this.block = block;
     }
@@ -112,8 +112,7 @@ export class BlockState {
         }).join(",");
     }
 
-    public createLangKey() {
-        const id = this.block.id.getItem() + "::" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_");
+    public createLangKey(id: string = this.block.id.getItem() + "::" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_")) {
         this.langKey = this.mod.langMap.createBlockKey(id);
         return this.langKey;
     }

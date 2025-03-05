@@ -6,8 +6,7 @@ class Block {
     id;
     mod;
     properties;
-    defaultState = null;
-    fallbackParams = null;
+    fallbackParams = {};
     blockStates = new Set;
     blockEntity = null;
     defaultLangKey = null;
@@ -17,8 +16,6 @@ class Block {
     }
     createState(blockStateString) {
         const blockState = new blockState_1.BlockState(this.mod, this);
-        if (this.defaultState == null)
-            this.defaultState = blockState;
         this.blockStates.add(blockState);
         if (blockStateString != null) {
             if (blockStateString instanceof Map) {
@@ -43,8 +40,8 @@ class Block {
         }
         return blockState;
     }
-    createBlockEntity() {
-        throw new Error("Method not implemented");
+    setBlockEntity(blockEntity) {
+        this.blockEntity = blockEntity;
     }
     getStates() {
         return new Set(this.blockStates);
@@ -69,8 +66,12 @@ class Block {
             stringId: this.id.toString(),
             blockStates
         };
-        if (this.fallbackParams != null)
-            object.defaultProperties = this.fallbackParams.serialize();
+        if (this.fallbackParams != null && Object.keys(this.fallbackParams).length > 0)
+            object.defaultProperties = this.fallbackParams;
+        if (this.blockEntity != null) {
+            object.blockEntityId = this.blockEntity.id.toString();
+            object.blockEntityParams = this.blockEntity.serialize();
+        }
         return object;
     }
     getBlockPath() {

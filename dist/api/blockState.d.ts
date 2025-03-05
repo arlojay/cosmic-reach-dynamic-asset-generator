@@ -43,7 +43,7 @@ export declare class BlockState {
     params: Map<string, string>;
     model: BlockModel;
     triggerSheet: TriggerSheet;
-    isOpaque: boolean;
+    isOpaque: boolean | null;
     lightAttenuation: number | null;
     canRaycastForBreak: boolean | null;
     canRaycastForPlaceOn: boolean | null;
@@ -51,6 +51,7 @@ export declare class BlockState {
     walkThrough: boolean | null;
     tags: string[];
     stateGenerators: string[];
+    placementRules: "default" | "stairs" | "directional_towards" | "directional_away" | "omnidirectional_towards" | "omnidirectional_away" | "axis" | null;
     hardness: number | null;
     dropState: BlockState | null;
     catalogHidden: boolean | null;
@@ -66,13 +67,13 @@ export declare class BlockState {
     allowSwapping: boolean | null;
     isFluid: boolean | null;
     itemIcon: Texture | null;
-    constructor(mod: Mod, block: Block);
+    constructor(mod: Mod, block: Block<any>);
     createBlockModel(id?: string): BlockModel;
     setBlockModel(model: BlockModel): void;
     createTriggerSheet(id?: string): TriggerSheet;
     setTriggerSheet(triggerSheet: TriggerSheet): void;
     compileParams(): string;
-    createLangKey(): LangKey;
+    createLangKey(id?: string): LangKey;
     setLangKey(key: LangKey): void;
     serialize(): SerializedBlockState;
     getFullId(): string;

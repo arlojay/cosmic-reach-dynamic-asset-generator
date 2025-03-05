@@ -1,9 +1,8 @@
+import { BlockEntity } from "./blockEntity";
 import { BlockState, SerializedBlockState } from "./blockState";
 import { Identifier } from "./identifier";
 import { LangKey } from "./lang";
 import { Mod } from "./mod";
-
-type BlockEntity = null;
 
 export interface BlockProperties {
     fuelTicks: number | null;
@@ -11,21 +10,22 @@ export interface BlockProperties {
 
 export interface SerializedBlock {
     stringId: string;
-    defaultProperties?: SerializedBlockState;
+    defaultProperties?: Partial<SerializedBlockState>;
     blockStates: Record<string, SerializedBlockState>;
+    blockEntityId?: string;
+    blockEntityParams?: any;
 }
 
-export class Block {
+export class Block<BlockEntityType extends BlockEntity<any> = never> {
     public id: Identifier;
     private mod: Mod;
 
     public properties: BlockProperties;
 
-    public defaultState: BlockState = null;
-    public fallbackParams: BlockState = null;
+    public fallbackParams: Partial<SerializedBlockState> = {};
     
     private blockStates: Set<BlockState> = new Set;
-    private blockEntity: BlockEntity | null = null;
+    public blockEntity: BlockEntityType = null;
     private defaultLangKey: LangKey | null = null;
 
     constructor(mod: Mod, id: Identifier) {
@@ -35,7 +35,6 @@ export class Block {
 
     public createState(blockStateString: Map<string, string> | Record<string, string> | string | null): BlockState {
         const blockState = new BlockState(this.mod, this);
-        if(this.defaultState == null) this.defaultState = blockState;
         
         this.blockStates.add(blockState);
 
@@ -63,8 +62,8 @@ export class Block {
         return blockState;
     }
 
-    public createBlockEntity(): BlockEntity {
-        throw new Error("Method not implemented");
+    public setBlockEntity(blockEntity: BlockEntityType) {
+        this.blockEntity = blockEntity;
     }
 
     public getStates() {
@@ -96,7 +95,11 @@ export class Block {
             blockStates
         };
         
-        if(this.fallbackParams != null) object.defaultProperties = this.fallbackParams.serialize();
+        if(this.fallbackParams != null && Object.keys(this.fallbackParams).length > 0) object.defaultProperties = this.fallbackParams;
+        if(this.blockEntity != null) {
+            object.blockEntityId = this.blockEntity.id.toString();
+            object.blockEntityParams = this.blockEntity.serialize();
+        }
 
         return object;
     }

@@ -1,4 +1,4 @@
-import { Box3, Matrix4, Vector2, Vector3 } from "three";
+import { Box3, Euler, Matrix4, Vector2, Vector3 } from "three";
 import { Texture } from "./texture";
 import { Mod } from "./mod";
 import { Identifier } from "./identifier";
@@ -44,6 +44,23 @@ export class BlockModelFace {
         face.uvRotation = this.uvRotation;
 
         return face;
+    }
+
+    public flipVertical() {
+        [ this.uvMin.y, this.uvMax.y ] = [ this.uvMax.y, this.uvMin.y ];
+        if(this.uvRotation == 270) this.uvRotation = 90;
+        else if(this.uvRotation == 90) this.uvRotation = 270;
+    }
+
+    public flipHorizontal() {
+        [ this.uvMin.x, this.uvMax.x ] = [ this.uvMax.x, this.uvMin.x ];
+        if(this.uvRotation == 270) this.uvRotation = 90;
+        else if(this.uvRotation == 90) this.uvRotation = 270;
+    }
+
+    public rotate(angle: number) {
+        this.uvRotation ??= 0;
+        this.uvRotation = ((this.uvRotation + angle) % 360 + 360) % 360 as typeof this.uvRotation;
     }
 }
 
@@ -211,6 +228,65 @@ export class BlockModelCuboid {
     public getUsedTextures() {
         return new Set(this.getAllFaces().map(v => v.texture).filter(v => v != null));
     }
+
+    public rotateTexturesX(amount: number) {
+        for(let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
+
+            this.transformFaceTextures(
+                [ this.north, this.down, this.south, this.up ],
+                [ this.up, this.north, this.down, this.south ]
+            );
+
+            this.down.flipVertical();
+            this.up.flipVertical();
+
+            this.east.rotate(90);
+            this.west.rotate(-90);
+        }
+    }
+
+    public rotateTexturesY(amount: number) {
+        for(let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
+            this.transformFaceTextures(
+                [ this.north, this.west, this.south, this.east ],
+                [ this.east, this.north, this.west, this.south ]
+            );
+
+            this.up.rotate(-90);
+            this.north.rotate(-90);
+            this.south.rotate(90);
+            this.down.rotate(90);
+        }
+    }
+
+    public rotateTexturesZ(amount: number) {
+        for(let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
+            this.transformFaceTextures(
+                [ this.down, this.east, this.up, this.west ],
+                [ this.west, this.down, this.east, this.up ]
+            );
+
+            this.east.rotate(-90);
+            this.east.flipVertical();
+            this.up.rotate(90);
+            this.west.rotate(90);
+            this.west.flipVertical();
+            this.down.rotate(-90);
+
+            this.north.rotate(90);
+            this.south.rotate(-90);
+        }
+    }
+
+    private transformFaceTextures(fromFaces: BlockModelFace[], toFaces: BlockModelFace[]) {
+        const toFacesClone = toFaces.map(face => face.clone());
+
+        for(let i = 0; i < Math.min(fromFaces.length, toFaces.length); i++) {
+            fromFaces[i].texture = toFacesClone[i].texture;
+            fromFaces[i].uvMin = toFacesClone[i].uvMin;
+            fromFaces[i].uvMax = toFacesClone[i].uvMax;
+        }
+    }
 }
 
 export class SerializedBlockModel {
@@ -222,6 +298,11 @@ export class SerializedBlockModel {
 }
 
 export class BlockModel {
+    private static tempModelsCreated: number = 0;
+    private static nextTempModelName(): string {
+        return "temp_model_" + (this.tempModelsCreated++);
+    }
+
     private mod: Mod;
     private cuboids: Set<BlockModelCuboid> = new Set;
     private textureOverrides: Map<string, Texture> = new Map;
@@ -231,7 +312,7 @@ export class BlockModel {
     public transparent: boolean = null;
     public parent: Identifier | string | BlockModel = null;
 
-    public constructor(mod: Mod, id: Identifier) {
+    public constructor(mod: Mod = null, id: Identifier = new Identifier(mod, BlockModel.nextTempModelName())) {
         this.mod = mod;
         this.id = id;
     }
@@ -303,23 +384,28 @@ export class BlockModel {
         return new Map(this.textureOverrides);
     }
 
-    public clone(newId: string) {
+    public clone(newId: string = BlockModel.nextTempModelName()) {
         const model = new BlockModel(this.mod, this.id.derive(newId));
-        
-        model.addModel(this);
-
+        model.addCuboid(...this.getCuboids().map(cuboid => cuboid.clone()))
+        model.parent = this.parent;
         return model;
     }
 
     public addModel(...models: BlockModel[]) {
         for(const model of models) {
+            if(model.parent != null) console.warn("Adding a model with a parent will not work as expected (" + model.id + " to " + this.id + ")")
             this.addCuboid(...model.getCuboids().map(cuboid => cuboid.clone()));
         }
     }
 
     public applyTransformation(transformation: Matrix4) {
+        const toCenter = new Matrix4().setPosition(new Vector3(-8, -8, -8));
+        const fromCenter = toCenter.clone().invert();
+
         for(const cuboid of this.cuboids) {
+            cuboid.applyTransformation(toCenter);
             cuboid.applyTransformation(transformation);
+            cuboid.applyTransformation(fromCenter);
         }
     }
 
@@ -392,6 +478,57 @@ export class BlockModel {
         }
 
         return object;
+    }
+
+    public rotateX(amount: number) {
+        const transformation = new Matrix4().makeRotationFromEuler(new Euler(-amount * Math.PI / 180, 0, 0));
+        this.applyTransformation(transformation);
+
+        for(const cuboid of this.cuboids) {
+            cuboid.rotateTexturesX(amount);
+        }
+
+        return this;
+    }
+    public rotateY(amount: number) {
+        const transformation = new Matrix4().makeRotationFromEuler(new Euler(0, amount * Math.PI / 180, 0));
+        this.applyTransformation(transformation);
+
+        for(const cuboid of this.cuboids) {
+            cuboid.rotateTexturesY(amount);
+        }
+
+        return this;
+    }
+    public rotateZ(amount: number) {
+        const transformation = new Matrix4().makeRotationFromEuler(new Euler(0, 0, amount * Math.PI / 180));
+        this.applyTransformation(transformation);
+
+        for(const cuboid of this.cuboids) {
+            cuboid.rotateTexturesZ(amount);
+        }
+
+        return this;
+    }
+
+    public realize() {
+        if(this.parent == null) return this;
+
+        if(this.parent instanceof BlockModel) {
+            this.addModel(this.parent.realize());
+
+            for(const cuboid of this.getCuboids()) {
+                for(const face of cuboid.getAllFaces()) {
+                    if(typeof face.texture == "string") {
+                        face.texture = this.textureOverrides.get(face.texture);
+                    }
+                }
+            }
+        } else {
+            console.warn("model " + this.id + " cannot realize a non-BlockModel parent (" + this.parent + ")")
+        }
+
+        return this;
     }
 
     public getBlockModelPath() {

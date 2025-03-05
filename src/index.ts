@@ -21,3 +21,5 @@ export * from "./api/item";
 export * from "./api/semantics";
 export * from "./api/audio";
 export * from "./api/sound";
+export * from "./api/templates/blockTemplate";
+export * from "./api/blockEntity";

@@ -15,6 +15,7 @@ class BlockState {
     walkThrough = null; // default false
     tags = new Array;
     stateGenerators = new Array;
+    placementRules = null;
     hardness = null; // default 1?
     dropState = null;
     catalogHidden = null;
@@ -59,8 +60,7 @@ class BlockState {
             return v.join("=");
         }).join(",");
     }
-    createLangKey() {
-        const id = this.block.id.getItem() + "::" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_");
+    createLangKey(id = this.block.id.getItem() + "::" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_")) {
         this.langKey = this.mod.langMap.createBlockKey(id);
         return this.langKey;
     }

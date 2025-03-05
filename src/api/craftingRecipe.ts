@@ -1,5 +1,8 @@
+import { Box2, Matrix3, Vector2 } from "three";
 import { ItemLike, itemLikeToString } from "./crafting";
 import { Identifier } from "./identifier";
+import { Item } from "./item";
+import { BlockState } from "./blockState";
 
 const craftingInputSymbols = "ABCDEFGHI";
 
@@ -17,17 +20,57 @@ export interface SerializedCraftingRecipe {
     }
 }
 
+export interface CraftingIngredientOptions {
+    item?: ItemLike;
+    tag?: string;
+}
+export class CraftingIngredient implements CraftingIngredientOptions {
+    public item: ItemLike = null;
+    public tag: string = null;
+    
+    constructor(options: CraftingIngredientOptions) {
+        if(options.item != null) this.item = options.item;
+        if(options.tag != null) this.tag = options.tag;
+    }
+
+    public serialize(): any {
+        if(this.tag != null) return { has_tag: this.tag };
+        return itemLikeToString(this.item);
+    }
+
+
+    public toString(): string {
+        if(this.item != null) return itemLikeToString(this.item);
+        if(this.tag != null) return "::" + this.tag;
+
+        throw new ReferenceError("Ingredient must have an `item` or `tag`", { cause: this });
+    }
+}
+
 export class ShapedCraftingRecipe implements CraftingRecipe<SerializedCraftingRecipe> {
-    private items: Map<string, ItemLike> = new Map;
+    private items: Map<string, CraftingIngredient> = new Map;
     public result: ItemLike = null;
     public resultCount: number = 1;
 
-    public setIngredientAt(x: number, y: number, ingredient: ItemLike) {
+    public setIngredientAt(x: number, y: number, ingredient: CraftingIngredient | CraftingIngredientOptions | ItemLike) {
         if(ingredient == null) throw new TypeError("Ingredient cannot be null");
 
-        this.items.set(x + " " + y, ingredient);
+        let instance: CraftingIngredient;
+        if(ingredient instanceof CraftingIngredient) {
+            instance = ingredient;
+        } else {
+            let options: CraftingIngredientOptions;
+            if(ingredient instanceof Item || ingredient instanceof BlockState || ingredient instanceof Identifier || typeof ingredient == "string") {
+                options = { item: ingredient  };
+            } else {
+                options = ingredient as CraftingIngredientOptions;
+            }
+            instance = new CraftingIngredient(options);
+        }
+
+        this.items.set(x + " " + y, instance);
     }
-    public getIngredientAt(x: number, y: number): ItemLike | null {
+    public getIngredientAt(x: number, y: number): CraftingIngredient | null {
         return this.items.get(x + " " + y) ?? null;
     }
 
@@ -48,20 +91,45 @@ export class ShapedCraftingRecipe implements CraftingRecipe<SerializedCraftingRe
         return recipe;
     }
 
-    public serialize() {
-        const itemTypes: Set<string> = new Set;
-        for(const item of this.items.values()) {
-            itemTypes.add(itemLikeToString(item));
+    public flip(flipX: boolean, flipY: boolean) {
+        return this.transform(new Matrix3().makeScale(flipX ? -1 : 1, flipY ? -1 : 1));
+    }
+    public translate(x: number, y: number) {
+        return this.transform(new Matrix3().makeTranslation(x, y));
+    }
+    public rotate(angle: number) {
+        return this.transform(new Matrix3().makeRotation(angle * Math.PI / 180));
+    }
+
+    private transform(matrix: Matrix3) {
+        const oldItems = this.items;
+        this.items = new Map;
+
+        for(const slot of oldItems.keys()) {
+            const splitSlot = slot.split(" ");
+            const itemPosition = new Vector2(+splitSlot[0], +splitSlot[1]);
+
+            itemPosition.x -= 1;
+            itemPosition.y -= 1;
+            itemPosition.applyMatrix3(matrix);
+            itemPosition.x += 1;
+            itemPosition.y += 1;
+            
+            this.setIngredientAt(Math.round(itemPosition.x), Math.round(itemPosition.y), oldItems.get(slot));
         }
 
-        const inputs: Record<string, string> = {};
+        return this;
+    }
+
+    public serialize() {
+        const inputs: Record<string, any> = {};
         const craftingSymbols: Map<string, string> = new Map;
 
         let itemIndex = 0;
-        for(const item of itemTypes) {
+        for(const item of this.items.values()) {
             const symbol = craftingInputSymbols[itemIndex];
-            inputs[symbol] = item;
-            craftingSymbols.set(item, symbol);
+            inputs[symbol] = item.serialize();
+            craftingSymbols.set(item.toString(), symbol);
             itemIndex++;
         }
 
@@ -74,7 +142,7 @@ export class ShapedCraftingRecipe implements CraftingRecipe<SerializedCraftingRe
                 if(item == null) {
                     row[x] = " ";
                 } else {
-                    row[x] = craftingSymbols.get(itemLikeToString(item));
+                    row[x] = craftingSymbols.get(item.toString());
                 }
             }
             pattern[y] = row.join("");
@@ -165,6 +233,10 @@ export class CraftingRecipeList {
         this.recipes.add(recipe);
 
         return recipe;
+    }
+
+    public add<T>(recipe: CraftingRecipe<T>) {
+        this.recipes.add(recipe);
     }
 
     public serialize() {

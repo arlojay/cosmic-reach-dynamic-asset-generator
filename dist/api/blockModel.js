@@ -33,6 +33,24 @@ class BlockModelFace {
         face.uvRotation = this.uvRotation;
         return face;
     }
+    flipVertical() {
+        [this.uvMin.y, this.uvMax.y] = [this.uvMax.y, this.uvMin.y];
+        if (this.uvRotation == 270)
+            this.uvRotation = 90;
+        else if (this.uvRotation == 90)
+            this.uvRotation = 270;
+    }
+    flipHorizontal() {
+        [this.uvMin.x, this.uvMax.x] = [this.uvMax.x, this.uvMin.x];
+        if (this.uvRotation == 270)
+            this.uvRotation = 90;
+        else if (this.uvRotation == 90)
+            this.uvRotation = 270;
+    }
+    rotate(angle) {
+        this.uvRotation ??= 0;
+        this.uvRotation = ((this.uvRotation + angle) % 360 + 360) % 360;
+    }
 }
 exports.BlockModelFace = BlockModelFace;
 ;
@@ -151,6 +169,45 @@ class BlockModelCuboid {
     getUsedTextures() {
         return new Set(this.getAllFaces().map(v => v.texture).filter(v => v != null));
     }
+    rotateTexturesX(amount) {
+        for (let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
+            this.transformFaceTextures([this.north, this.down, this.south, this.up], [this.up, this.north, this.down, this.south]);
+            this.down.flipVertical();
+            this.up.flipVertical();
+            this.east.rotate(90);
+            this.west.rotate(-90);
+        }
+    }
+    rotateTexturesY(amount) {
+        for (let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
+            this.transformFaceTextures([this.north, this.west, this.south, this.east], [this.east, this.north, this.west, this.south]);
+            this.up.rotate(-90);
+            this.north.rotate(-90);
+            this.south.rotate(90);
+            this.down.rotate(90);
+        }
+    }
+    rotateTexturesZ(amount) {
+        for (let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
+            this.transformFaceTextures([this.down, this.east, this.up, this.west], [this.west, this.down, this.east, this.up]);
+            this.east.rotate(-90);
+            this.east.flipVertical();
+            this.up.rotate(90);
+            this.west.rotate(90);
+            this.west.flipVertical();
+            this.down.rotate(-90);
+            this.north.rotate(90);
+            this.south.rotate(-90);
+        }
+    }
+    transformFaceTextures(fromFaces, toFaces) {
+        const toFacesClone = toFaces.map(face => face.clone());
+        for (let i = 0; i < Math.min(fromFaces.length, toFaces.length); i++) {
+            fromFaces[i].texture = toFacesClone[i].texture;
+            fromFaces[i].uvMin = toFacesClone[i].uvMin;
+            fromFaces[i].uvMax = toFacesClone[i].uvMax;
+        }
+    }
 }
 exports.BlockModelCuboid = BlockModelCuboid;
 class SerializedBlockModel {
@@ -162,6 +219,10 @@ class SerializedBlockModel {
 }
 exports.SerializedBlockModel = SerializedBlockModel;
 class BlockModel {
+    static tempModelsCreated = 0;
+    static nextTempModelName() {
+        return "temp_model_" + (this.tempModelsCreated++);
+    }
     mod;
     cuboids = new Set;
     textureOverrides = new Map;
@@ -169,7 +230,7 @@ class BlockModel {
     cullsSelf = null;
     transparent = null;
     parent = null;
-    constructor(mod, id) {
+    constructor(mod = null, id = new identifier_1.Identifier(mod, BlockModel.nextTempModelName())) {
         this.mod = mod;
         this.id = id;
     }
@@ -228,19 +289,26 @@ class BlockModel {
     getTextureOverrides() {
         return new Map(this.textureOverrides);
     }
-    clone(newId) {
+    clone(newId = BlockModel.nextTempModelName()) {
         const model = new BlockModel(this.mod, this.id.derive(newId));
-        model.addModel(this);
+        model.addCuboid(...this.getCuboids().map(cuboid => cuboid.clone()));
+        model.parent = this.parent;
         return model;
     }
     addModel(...models) {
         for (const model of models) {
+            if (model.parent != null)
+                console.warn("Adding a model with a parent will not work as expected (" + model.id + " to " + this.id + ")");
             this.addCuboid(...model.getCuboids().map(cuboid => cuboid.clone()));
         }
     }
     applyTransformation(transformation) {
+        const toCenter = new three_1.Matrix4().setPosition(new three_1.Vector3(-8, -8, -8));
+        const fromCenter = toCenter.clone().invert();
         for (const cuboid of this.cuboids) {
+            cuboid.applyTransformation(toCenter);
             cuboid.applyTransformation(transformation);
+            cuboid.applyTransformation(fromCenter);
         }
     }
     setAllTextures(texture) {
@@ -298,6 +366,48 @@ class BlockModel {
             }
         }
         return object;
+    }
+    rotateX(amount) {
+        const transformation = new three_1.Matrix4().makeRotationFromEuler(new three_1.Euler(-amount * Math.PI / 180, 0, 0));
+        this.applyTransformation(transformation);
+        for (const cuboid of this.cuboids) {
+            cuboid.rotateTexturesX(amount);
+        }
+        return this;
+    }
+    rotateY(amount) {
+        const transformation = new three_1.Matrix4().makeRotationFromEuler(new three_1.Euler(0, amount * Math.PI / 180, 0));
+        this.applyTransformation(transformation);
+        for (const cuboid of this.cuboids) {
+            cuboid.rotateTexturesY(amount);
+        }
+        return this;
+    }
+    rotateZ(amount) {
+        const transformation = new three_1.Matrix4().makeRotationFromEuler(new three_1.Euler(0, 0, amount * Math.PI / 180));
+        this.applyTransformation(transformation);
+        for (const cuboid of this.cuboids) {
+            cuboid.rotateTexturesZ(amount);
+        }
+        return this;
+    }
+    realize() {
+        if (this.parent == null)
+            return this;
+        if (this.parent instanceof BlockModel) {
+            this.addModel(this.parent.realize());
+            for (const cuboid of this.getCuboids()) {
+                for (const face of cuboid.getAllFaces()) {
+                    if (typeof face.texture == "string") {
+                        face.texture = this.textureOverrides.get(face.texture);
+                    }
+                }
+            }
+        }
+        else {
+            console.warn("model " + this.id + " cannot realize a non-BlockModel parent (" + this.parent + ")");
+        }
+        return this;
     }
     getBlockModelPath() {
         return "models/blocks/" + this.id.getItem() + ".json";

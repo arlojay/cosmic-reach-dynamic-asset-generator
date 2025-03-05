@@ -1,4 +1,5 @@
 import { Block } from "./block";
+import { BlockEntity } from "./blockEntity";
 import { BlockModel } from "./blockModel";
 import { Crafting } from "./crafting";
 import { Identifier } from "./identifier";
@@ -8,7 +9,7 @@ import { TriggerSheet } from "./triggerSheet";
 
 export class Mod {
     public id: string;
-    public blocks: Set<Block> = new Set;
+    public blocks: Set<Block<any>> = new Set;
     public blockModels: Set<BlockModel> = new Set;
     public triggerSheets: Set<TriggerSheet> = new Set;
     public items: Set<Item> = new Set;
@@ -19,8 +20,8 @@ export class Mod {
         this.id = id;
     }
 
-    public createBlock(id: string): Block {
-        const block = new Block(this, new Identifier(this, id));
+    public createBlock<BlockEntityType extends BlockEntity<any> = never>(id: string): Block<BlockEntityType> {
+        const block = new Block<BlockEntityType>(this, new Identifier(this, id));
 
         this.blocks.add(block);
 

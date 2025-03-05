@@ -1,6 +1,8 @@
+import { inspect } from "util";
 import { Identifier } from "./identifier";
 import { Mod } from "./mod";
-import { TriggerAction } from "./triggerActions";
+import { Sound } from "./sound";
+import { PlaySound2DAction, PlaySound3DAction, TriggerAction } from "./triggerActions";
 
 function deepClone<T>(object: T): T {
     return JSON.parse(JSON.stringify(object));
@@ -13,13 +15,18 @@ export class SerializedTriggerSheet {
 }
 
 export class TriggerSheet {
-    public mod: Mod;
+    private static tempSheetsCreated: number = 0;
+    private static nextTempSheetName(): string {
+        return "temp_sheet_" + (this.tempSheetsCreated++);
+    }
+
+    private mod: Mod;
     public id: Identifier;
 
     public parent: Identifier | string | TriggerSheet;
     public triggers: Map<string, TriggerAction[]> = new Map;
 
-    public constructor(mod: Mod, id: Identifier) {
+    public constructor(mod: Mod = null, id: Identifier = new Identifier(mod, TriggerSheet.nextTempSheetName())) {
         this.mod = mod;
         this.id = id;
     }
@@ -38,11 +45,9 @@ export class TriggerSheet {
         this.triggers.set(id, triggerList);
     }
 
-    public clone(newId: string) {
+    public clone(newId: string = TriggerSheet.nextTempSheetName()) {
         const sheet = new TriggerSheet(this.mod, this.id.derive(newId));
-
         sheet.addTriggerSheet(this);
-        
         return sheet;
     }
 
@@ -58,7 +63,7 @@ export class TriggerSheet {
         const allTriggers: Record<string, any> = {};
 
         for(const [ id, triggers ] of this.triggers) {
-            allTriggers[id] = triggers.map(v => v.serialize());
+            allTriggers[id] = triggers.map(v => v.serialize(this.mod));
         }
 
         const object: SerializedTriggerSheet = {
@@ -70,7 +75,7 @@ export class TriggerSheet {
             if(this.parent instanceof TriggerSheet) {
                 object.parent = this.parent.getTriggerSheetId().toString();
             } else if(this.parent instanceof Identifier) {
-                object.parent = this.parent.derive("block_events/" + this.parent.getItem() + ".json").toString();
+                object.parent = this.parent.toString();
             } else {
                 object.parent = this.parent;
             }
@@ -84,5 +89,26 @@ export class TriggerSheet {
     }
     public getTriggerSheetId() {
         return this.id.toString().replace(/\//g, "•");
+    }
+
+    public getAllActions() {
+        return Array.from(
+            this.triggers.values()
+            .reduce((p, c) =>
+                p.concat(c),
+                new Array<TriggerAction<any>>
+            )
+        )
+    }
+    public getAllSoundInstances(): Sound[] {
+        const allSounds: Sound[] = new Array;
+
+        for(const action of this.getAllActions()) {
+            if((action instanceof PlaySound2DAction) || (action instanceof PlaySound3DAction)) {
+                if(action.parameters.sound instanceof Sound) allSounds.push(action.parameters.sound);
+            }
+        }
+
+        return allSounds;
     }
 }

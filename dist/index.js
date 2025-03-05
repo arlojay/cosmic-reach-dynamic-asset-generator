@@ -37,3 +37,5 @@ __exportStar(require("./api/item"), exports);
 __exportStar(require("./api/semantics"), exports);
 __exportStar(require("./api/audio"), exports);
 __exportStar(require("./api/sound"), exports);
+__exportStar(require("./api/templates/blockTemplate"), exports);
+__exportStar(require("./api/blockEntity"), exports);
