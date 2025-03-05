@@ -37,6 +37,7 @@ export interface SerializedBlockState {
     allowSwapping?: boolean;
     isFluid?: boolean
     itemIcon?: string;
+    refractiveIndex?: number;
 }
 
 export class BlockState {
@@ -71,6 +72,7 @@ export class BlockState {
     public allowSwapping: boolean | null = null; // default true
     public isFluid: boolean | null = null;
     public itemIcon: Texture | null = null;
+    public refractiveIndex: number | null = null;
 
     public constructor(mod: Mod, block: Block<any>) {
         this.mod = mod;
@@ -163,6 +165,7 @@ export class BlockState {
         if(this.friction != null) object.friction = this.friction;
         if(this.bounciness != null) object.bounciness = this.bounciness;
         if(this.hardness != null) object.hardness = this.hardness;
+        if(this.refractiveIndex != null) object.refractiveIndex = this.refractiveIndex;
 
         if(this.langKey != null) object.langKey = this.langKey.toString();
 

@@ -36,6 +36,7 @@ export interface SerializedBlockState {
     allowSwapping?: boolean;
     isFluid?: boolean;
     itemIcon?: string;
+    refractiveIndex?: number;
 }
 export declare class BlockState {
     private mod;
@@ -67,6 +68,7 @@ export declare class BlockState {
     allowSwapping: boolean | null;
     isFluid: boolean | null;
     itemIcon: Texture | null;
+    refractiveIndex: number | null;
     constructor(mod: Mod, block: Block<any>);
     createBlockModel(id?: string): BlockModel;
     setBlockModel(model: BlockModel): void;

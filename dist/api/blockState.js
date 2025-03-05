@@ -31,6 +31,7 @@ class BlockState {
     allowSwapping = null; // default true
     isFluid = null;
     itemIcon = null;
+    refractiveIndex = null;
     constructor(mod, block) {
         this.mod = mod;
         this.block = block;
@@ -124,6 +125,8 @@ class BlockState {
             object.bounciness = this.bounciness;
         if (this.hardness != null)
             object.hardness = this.hardness;
+        if (this.refractiveIndex != null)
+            object.refractiveIndex = this.refractiveIndex;
         if (this.langKey != null)
             object.langKey = this.langKey.toString();
         return object;
