@@ -54,4 +54,5 @@ export declare class Directions {
     static relative: DirectionMap;
     static simpleBlock: DirectionMap;
     static nativeRotation: DirectionMap;
+    static omnidirectionalRotation: DirectionMap;
 }

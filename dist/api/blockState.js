@@ -7,7 +7,7 @@ class BlockState {
     params = new Map;
     model;
     triggerSheet = null;
-    isOpaque = true;
+    isOpaque = null; // default true
     lightAttenuation = null; // default 15
     canRaycastForBreak = null; // default true
     canRaycastForPlaceOn = null; // default true
@@ -97,6 +97,8 @@ class BlockState {
             object.tags = this.tags;
         if (this.stateGenerators != null && this.stateGenerators.length > 0)
             object.stateGenerators = this.stateGenerators;
+        if (this.placementRules != null)
+            object.placementRules = this.placementRules;
         if (this.dropState != null)
             object.dropId = this.dropState.getFullId();
         if (this.dropParamOverrides != null)

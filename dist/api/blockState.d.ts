@@ -16,6 +16,7 @@ export interface SerializedBlockState {
     walkThrough?: boolean;
     tags?: string[];
     stateGenerators?: string[];
+    placementRules?: string;
     hardness?: number;
     dropId?: string;
     catalogHidden?: boolean;

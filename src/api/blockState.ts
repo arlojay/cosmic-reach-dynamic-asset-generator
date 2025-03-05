@@ -17,6 +17,7 @@ export interface SerializedBlockState {
     walkThrough?: boolean;
     tags?: string[];
     stateGenerators?: string[];
+    placementRules?: string;
     hardness?: number;
     dropId?: string;
     catalogHidden?: boolean;
@@ -54,6 +55,7 @@ export class BlockState {
     public walkThrough: boolean | null = null; // default false
     public tags: string[] = new Array;
     public stateGenerators: string[] = new Array;
+    public placementRules: "default" | "stairs" | "directional_towards" | "directional_away" | "omnidirectional_towards" | "omnidirectional_away" | "axis" | null = null;
     public hardness: number | null = null; // default 1?
     public dropState: BlockState | null = null;
     public catalogHidden: boolean | null = null;
@@ -143,6 +145,7 @@ export class BlockState {
 
         if(this.tags != null && this.tags.length > 0) object.tags = this.tags;
         if(this.stateGenerators != null && this.stateGenerators.length > 0) object.stateGenerators = this.stateGenerators;
+        if(this.placementRules != null) object.placementRules = this.placementRules;
         
         if(this.dropState != null) object.dropId = this.dropState.getFullId();
         if(this.dropParamOverrides != null) object.dropParamOverrides = this.dropParamOverrides;

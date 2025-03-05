@@ -183,5 +183,13 @@ class Directions {
         new Direction("NegZ", 0, 0, -1),
         new Direction("PosZ", 0, 0, 1),
     ]);
+    static omnidirectionalRotation = new DirectionMap([
+        new Direction("NegX", -1, 0, 0),
+        new Direction("PosX", 1, 0, 0),
+        new Direction("NegY", 0, -1, 0),
+        new Direction("PosY", 0, 1, 0),
+        new Direction("NegZ", 0, 0, -1),
+        new Direction("PosZ", 0, 0, 1),
+    ]);
 }
 exports.Directions = Directions;
