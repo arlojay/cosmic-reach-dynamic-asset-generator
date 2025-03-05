@@ -35,3 +35,5 @@ __exportStar(require("./api/craftingRecipe"), exports);
 __exportStar(require("./api/furnaceRecipe"), exports);
 __exportStar(require("./api/item"), exports);
 __exportStar(require("./api/semantics"), exports);
+__exportStar(require("./api/audio"), exports);
+__exportStar(require("./api/sound"), exports);

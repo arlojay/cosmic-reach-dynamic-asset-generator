@@ -19,3 +19,5 @@ export * from "./api/craftingRecipe";
 export * from "./api/furnaceRecipe";
 export * from "./api/item";
 export * from "./api/semantics";
+export * from "./api/audio";
+export * from "./api/sound";
