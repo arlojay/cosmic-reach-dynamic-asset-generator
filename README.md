@@ -9,7 +9,7 @@ If you want to quickly set up a new mod, [use this template](https://github.com/
 ## Demo mod
 Adds a stone breaker which runs on an interaction (only breaks stone)
 ```js
-import { Texture, Mod, Writer, Directions, RunTriggerAction, BlockEventPredicate } from "../dist/index.js";
+import { Texture, Mod, Writer, Directions, RunTriggerAction, BlockEventPredicate } from "cosmic-reach-dag";
 
 main();
 
