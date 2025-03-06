@@ -84,8 +84,6 @@ export class Audio {
                     "-ar", channel.sampleRate.toString(),
                     "-ac", "1"
                 ])
-
-            console.log("CHANNEL " + i + " SAMPLE RATE: " + channel.sampleRate);
         }
 
 
@@ -108,16 +106,13 @@ export class Audio {
 
         if(codec != null) command = command.audioCodec(codec);
 
-        console.log("Writing audio")
         command = command
             .on("error", err => {
                 outputStream.emit("error", new Error("ffmpeg encoding error: " + err.message, { cause: err }));
             })
             .on("end", () => {
-                console.log("Reading audio")
                 outputFile.createReadStream()
                     .on("end", () => {
-                        console.log("Done reading audio")
                         for(const tempFile of tempFiles) tempFile.rm();
                         outputFile.rm();
                     })
@@ -125,8 +120,7 @@ export class Audio {
             });
         
         command.run();
-    
-        console.log(command._getArguments().join(" "));
+
         return outputStream;
     }
 
@@ -160,7 +154,6 @@ export class Audio {
                 })
         });
 
-        console.log(inspect(info, false, 10));
         const audioChannel = info.streams.find(v => v.codec_type == "audio");
         const channelCount = audioChannel.channels;
         const channels = new Array<ArrayBuffer>(channelCount);

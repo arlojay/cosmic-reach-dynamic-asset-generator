@@ -14,8 +14,7 @@ export class TempFile {
         mkdirSync(this.tempDir);
 
         process.addListener("beforeExit", () => {
-            console.log("rm dir ", this.tempDir);
-            // rmSync(this.tempDir, { recursive: true, force: true });
+            rmSync(this.tempDir, { recursive: true, force: true });
         })
     }
 
@@ -45,8 +44,7 @@ export class TempFile {
     }
 
     public rm() {
-        console.log("rm " + this.filename);
-        // rmSync(this.filename, { force: true });
+        rmSync(this.filename, { force: true });
     }
 
     public toString() {

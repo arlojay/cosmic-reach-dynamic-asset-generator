@@ -53,8 +53,9 @@ export class Writer {
                 fs.writeFileSync(file, data);
             }
         } catch(e) {
-            console.error(e);
+            console.error("Error writing object to disk");
             console.log(inspect(data, false, 8));
+            throw e;
         }
     }
 
