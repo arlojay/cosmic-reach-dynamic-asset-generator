@@ -3,6 +3,9 @@
 
 [Cosmic Reach](https://finalforeach.itch.io/cosmic-reach) is a game developed by FinalForEach. I do not own any rights to assets in the game.
 
+## Installation
+If you want to quickly set up a new mod, [use this template](https://github.com/arlojay/cosmic-reach-dag-mod-template) (cosmic-reach-dag-mod-template on GitHub)
+
 ## Demo mod
 Adds a stone breaker which runs on an interaction (only breaks stone)
 ```js

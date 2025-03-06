@@ -7,7 +7,7 @@
   "scripts": {
     "test": "npx tsc & cd tests & node test",
     "build": "npx tsc",
-    "publish": "npx tsc & npm publish"
+    "prepublish": "npx tsc"
   },
   "keywords": [
     "asset-generator",
