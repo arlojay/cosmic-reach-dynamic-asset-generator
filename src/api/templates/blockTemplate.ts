@@ -11,10 +11,17 @@ import { PlaySound2DAction } from "../triggerActions";
 export abstract class BasicBlock {
     protected abstract id: string;
     protected isOpaque: boolean = false;
+    protected lightAttenuation: number = this.isOpaque ? 15 : 0;
+    protected cullsSelf: boolean = null;
     protected hardness: number = null;
+    protected refractiveIndex: number = null;
 
-    protected block: Block;
-    protected defaultState: BlockState;
+    protected seamless: boolean = false;
+    protected createSlabs: boolean = false;
+    protected createStairs: boolean = false;
+
+    public block: Block;
+    public defaultState: BlockState;
 
     public async create(mod: Mod) {
         const block = mod.createBlock(this.id);
@@ -25,11 +32,16 @@ export abstract class BasicBlock {
         this.defaultState = state;
         state.dropState = this.getDropItem();
         state.isOpaque = this.isOpaque;
+
         if(this.hardness != null) state.hardness = this.hardness;
+
+        state.lightAttenuation = this.lightAttenuation;
+        if(this.refractiveIndex != null) state.refractiveIndex = this.refractiveIndex;
 
         const model = state.createBlockModel(this.id);
         model.setParent(new Identifier("base", "cube"));
         model.transparent = !this.isOpaque;
+        if(this.cullsSelf != null) model.cullsSelf = this.cullsSelf;
         await this.overrideTextures(model);
 
         const triggerSheet = state.createTriggerSheet(this.id);
