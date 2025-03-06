@@ -64,7 +64,7 @@ export class Writer {
         try {
             if(!keepOldFolder) fs.rmSync(directory, { recursive: true });
         } catch(e) {
-            console.info(e);
+            // console.info(e);
         }
 
         const usedBlockModels: Set<BlockModel> = new Set;
