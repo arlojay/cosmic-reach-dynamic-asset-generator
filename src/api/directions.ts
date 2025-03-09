@@ -38,7 +38,8 @@ export class Direction {
         return this.name[0].toUpperCase() + this.name.slice(1);
     }
 
-    is(name: string) {
+    is(name: Direction | string) {
+        if(name instanceof Direction) return (name.x == this.x && name.y == this.y && name.z == this.z) || name.name == this.name;
         return this.name.toLowerCase() === name.toLowerCase();
     }
 
@@ -149,7 +150,7 @@ export class DirectionMap {
     }
 
     getDirection(name: string) {
-        return this.directions.get(name.toLowerCase());
+        return this.directions.get(name) ?? this.directions.entries().find(([n, d]) => n.toLowerCase() == name.toLowerCase())?.[1];
     }
 
     values() {
