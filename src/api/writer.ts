@@ -1,5 +1,5 @@
 import path from "node:path";
-import fs from "node:fs";
+import fs, { stat } from "node:fs";
 import { Mod } from "./mod";
 import { BlockModel } from "./blockModel";
 import { TriggerSheet } from "./triggerSheet";
@@ -10,6 +10,7 @@ import { LangKey, LangKeyLanguage } from "./lang";
 import { $enum } from "ts-enum-util";
 import { Sound } from "./sound";
 import { inspect } from "node:util";
+import { BasicBlockStateGeneratorEntry, BlockStateGenerator, BlockStateGeneratorEntry, TemplatedBlockStateGeneratorEntry } from "./blockStateGenerator";
 
 function* joinIterators<T>(iterator1: Iterable<T>, iterator2: Iterable<T>) {
     yield* iterator1;
@@ -85,6 +86,21 @@ export class Writer {
             }
 
             this.writeFile(blockPath, block.serialize());
+        }
+
+        for(const blockStateGenerator of this.mod.blockStateGenerators) {
+            const blockStateGeneratorPath = path.join(directory, blockStateGenerator.getBlockStateGeneratorPath());
+
+            this.writeFile(blockStateGeneratorPath, blockStateGenerator.serialize());
+
+            for(const generator of blockStateGenerator.generators) {
+                if(generator instanceof TemplatedBlockStateGeneratorEntry) {
+                    usedBlockModels.add(generator.state.model);
+                }
+                if(generator instanceof BasicBlockStateGeneratorEntry) {
+                    if(generator.model instanceof BlockModel) usedBlockModels.add(generator.model);
+                }
+            }
         }
         
         let includedBlockModels = 0;

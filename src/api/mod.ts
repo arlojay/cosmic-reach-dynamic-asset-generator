@@ -1,6 +1,7 @@
 import { Block } from "./block";
 import { BlockEntity } from "./blockEntity";
 import { BlockModel } from "./blockModel";
+import { BlockStateGenerator } from "./blockStateGenerator";
 import { Crafting } from "./crafting";
 import { Identifier } from "./identifier";
 import { Item } from "./item";
@@ -12,6 +13,7 @@ export class Mod {
     public blocks: Set<Block<any>> = new Set;
     public blockModels: Set<BlockModel> = new Set;
     public triggerSheets: Set<TriggerSheet> = new Set;
+    public blockStateGenerators: Set<BlockStateGenerator> = new Set;
     public items: Set<Item> = new Set;
     public langMap: LangMap = new LangMap(this);
     public crafting: Crafting = new Crafting(this);
@@ -42,6 +44,14 @@ export class Mod {
         this.triggerSheets.add(triggerSheet);
 
         return triggerSheet;
+    }
+
+    public createBlockStateGenerator(id: string) {
+        const blockStateGenerator = new BlockStateGenerator(new Identifier(this, id));
+
+        this.blockStateGenerators.add(blockStateGenerator);
+
+        return blockStateGenerator;
     }
 
     public createItem(id: string): Item {

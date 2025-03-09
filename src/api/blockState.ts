@@ -34,7 +34,7 @@ export interface SerializedBlockState {
     bounciness?: number;
     canPlace?: boolean;
     rotXZ?: number;
-    dropParamOverrides?: Record<string, string>;
+    dropParams?: Record<string, string>;
     allowSwapping?: boolean;
     isFluid?: boolean
     itemIcon?: string;
@@ -154,11 +154,15 @@ export class BlockState {
         if(this.isOpaque != null) object.isOpaque = this.isOpaque;
 
         if(this.tags != null && this.tags.length > 0) object.tags = this.tags;
-        if(this.stateGenerators != null && this.stateGenerators.length > 0) object.stateGenerators = this.stateGenerators;
+        if(this.stateGenerators != null && this.stateGenerators.size > 0) object.stateGenerators = Array.from(this.stateGenerators).map(obj => {
+            if(obj instanceof BlockStateGeneratorEntry) obj = obj.parent.getBlockStateGeneratorId();
+            if(obj instanceof Identifier) obj = obj.toString();
+            return obj;
+        });
         if(this.placementRules != null) object.placementRules = this.placementRules;
         
         if(this.dropState != null) object.dropId = this.dropState.getFullId();
-        if(this.dropParamOverrides != null) object.dropParamOverrides = this.dropParamOverrides;
+        if(this.dropParamOverrides != null) object.dropParams = this.dropParamOverrides;
         if(this.swapGroupId != null) object.swapGroupId = this.swapGroupId.toString();
         if(this.allowSwapping != null) object.allowSwapping = this.allowSwapping;
         if(this.catalogHidden != null) object.catalogHidden = this.catalogHidden;
@@ -180,7 +184,7 @@ export class BlockState {
 
         return object;
     }
-    
+ 
     public getBlock() {
         return this.block;
     }
