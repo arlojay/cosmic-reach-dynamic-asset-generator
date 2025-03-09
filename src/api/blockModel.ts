@@ -388,6 +388,8 @@ export class BlockModel {
         const model = new BlockModel(this.mod, this.id.derive(newId));
         model.addCuboid(...this.getCuboids().map(cuboid => cuboid.clone()))
         model.parent = this.parent;
+        model.cullsSelf = this.cullsSelf;
+        model.transparent = this.transparent;
         return model;
     }
 
