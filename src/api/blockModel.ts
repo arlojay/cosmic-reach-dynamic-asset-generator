@@ -85,6 +85,9 @@ export interface SerializedBlockModelCuboid {
 
 export class BlockModelCuboid {
     public box: Box3 = new Box3(new Vector3(0, 0, 0), new Vector3(16, 16, 16));
+    private flipX: boolean = false;
+    private flipY: boolean = false;
+    private flipZ: boolean = false;
 
     public west = new BlockModelFace;
     public east = new BlockModelFace;
@@ -99,6 +102,14 @@ export class BlockModelCuboid {
     }
 
     public setSize(minX: number, minY: number, minZ: number, maxX: number, maxY: number, maxZ: number, preventUVReset: boolean = false) {
+        this.flipX = minX > maxX;
+        this.flipY = minY > maxY;
+        this.flipZ = minZ > maxZ;
+        
+        [ minX, maxX ] = [ minX, maxX ].sort();
+        [ minY, maxY ] = [ minY, maxY ].sort();
+        [ minZ, maxZ ] = [ minZ, maxZ ].sort();
+
         this.box.set(
             new Vector3(minX, minY, minZ),
             new Vector3(maxX, maxY, maxZ)
@@ -119,26 +130,36 @@ export class BlockModelCuboid {
         this.up.cull = this.box.max.y == 16;
     }
 
+    private createRealBox() {
+        const box = this.box.clone();
+        if(this.flipX) [ box.min.x, box.max.x ] = [ box.max.x, box.min.x ];
+        if(this.flipY) [ box.min.y, box.max.y ] = [ box.max.y, box.min.y ];
+        if(this.flipZ) [ box.min.z, box.max.z ] = [ box.max.z, box.min.z ];
+        return box;
+    }
+
     public recalculateUVs() {
-        this.west.uvMin.set(this.box.min.z, this.box.min.y);
-        this.west.uvMax.set(this.box.max.z, this.box.max.y);
+        const realBox = this.createRealBox();
+
+        this.west.uvMin.set(realBox.min.z, realBox.min.y);
+        this.west.uvMax.set(realBox.max.z, realBox.max.y);
         
-        this.east.uvMin.set(16 - this.box.max.z, this.box.min.y);
-        this.east.uvMax.set(16 - this.box.min.z, this.box.max.y);
+        this.east.uvMin.set(16 - realBox.max.z, realBox.min.y);
+        this.east.uvMax.set(16 - realBox.min.z, realBox.max.y);
 
         
-        this.north.uvMin.set(this.box.min.x, this.box.min.y);
-        this.north.uvMax.set(this.box.max.x, this.box.max.y);
+        this.north.uvMin.set(realBox.min.x, realBox.min.y);
+        this.north.uvMax.set(realBox.max.x, realBox.max.y);
         
-        this.south.uvMin.set(16 - this.box.max.x, this.box.min.y);
-        this.south.uvMax.set(16 - this.box.min.x, this.box.max.y);
+        this.south.uvMin.set(16 - realBox.max.x, realBox.min.y);
+        this.south.uvMax.set(16 - realBox.min.x, realBox.max.y);
 
         
-        this.down.uvMin.set(this.box.min.x, this.box.min.z);
-        this.down.uvMax.set(this.box.max.x, this.box.max.z);
+        this.down.uvMin.set(realBox.min.x, realBox.min.z);
+        this.down.uvMax.set(realBox.max.x, realBox.max.z);
 
-        this.up.uvMin.set(this.box.min.x, 16 - this.box.max.z);
-        this.up.uvMax.set(this.box.max.x, 16 - this.box.min.z);
+        this.up.uvMin.set(realBox.min.x, 16 - realBox.max.z);
+        this.up.uvMax.set(realBox.max.x, 16 - realBox.min.z);
 
         const center = new Vector2(8, 8);
         for(const face of this.getAllFaces()) {
@@ -146,13 +167,13 @@ export class BlockModelCuboid {
                 face.uvMin.rotateAround(center, Math.PI * 0.5);
                 face.uvMax.rotateAround(center, Math.PI * 0.5);
 
-                const minX = Math.min(face.uvMin.x, face.uvMax.x);
-                const minY = Math.min(face.uvMin.y, face.uvMax.y);
-                const maxX = Math.max(face.uvMin.x, face.uvMax.x);
-                const maxY = Math.max(face.uvMin.y, face.uvMax.y);
-
-                face.uvMin.set(minX, minY);
-                face.uvMax.set(maxX, maxY);
+                // const minX = Math.min(face.uvMin.x, face.uvMax.x);
+                // const minY = Math.min(face.uvMin.y, face.uvMax.y);
+                // const maxX = Math.max(face.uvMin.x, face.uvMax.x);
+                // const maxY = Math.max(face.uvMin.y, face.uvMax.y);
+                
+                // face.uvMin.set(minX, minY);
+                // face.uvMax.set(maxX, maxY);
             }
         }
     }
@@ -170,6 +191,19 @@ export class BlockModelCuboid {
 
     public applyTransformation(transformation: Matrix4) {
         this.box.applyMatrix4(transformation);
+
+        if(this.box.max.x < this.box.min.x) {
+            this.flipX = !this.flipX;
+            [ this.box.min.x, this.box.max.x ] = [ this.box.max.x, this.box.min.x ];
+        }
+        if(this.box.max.y < this.box.min.y) {
+            this.flipY = !this.flipY;
+            [ this.box.min.y, this.box.max.y ] = [ this.box.max.y, this.box.min.y ];
+        }
+        if(this.box.max.z < this.box.min.z) {
+            this.flipZ = !this.flipZ;
+            [ this.box.min.z, this.box.max.z ] = [ this.box.max.z, this.box.min.z ];
+        }
     }
 
     public setAllTextures(texture: Texture) {
@@ -191,14 +225,20 @@ export class BlockModelCuboid {
         cuboid.box.min.copy(this.box.min);
         cuboid.box.max.copy(this.box.max);
 
+        cuboid.flipX = this.flipX;
+        cuboid.flipY = this.flipY;
+        cuboid.flipZ = this.flipZ;
+
         return cuboid;
     }
 
     public serialize(textureIds: Map<Texture, string>): SerializedBlockModelCuboid {
+        const realBox = this.createRealBox();
+
         const object: SerializedBlockModelCuboid = {
             localBounds: [
-                this.box.min.x, this.box.min.y, this.box.min.z,
-                this.box.max.x, this.box.max.y, this.box.max.z
+                realBox.min.x, realBox.min.y, realBox.min.z,
+                realBox.max.x, realBox.max.y, realBox.max.z
             ],
             faces: {}
         };
@@ -232,8 +272,14 @@ export class BlockModelCuboid {
     public rotateTexturesX(amount: number) {
         for(let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
 
+            const fromFaces: BlockModelFace[] = new Array;
+            const backwards = (this.flipY && !this.flipZ) || (!this.flipY && this.flipZ);
+
+            if(!backwards) fromFaces.push(this.north, this.down, this.south, this.up);
+            if(backwards) fromFaces.push(this.south, this.down, this.north, this.up);
+
             this.transformFaceTextures(
-                [ this.north, this.down, this.south, this.up ],
+                fromFaces,
                 [ this.up, this.north, this.down, this.south ]
             );
 
@@ -247,8 +293,15 @@ export class BlockModelCuboid {
 
     public rotateTexturesY(amount: number) {
         for(let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
+
+            const fromFaces: BlockModelFace[] = new Array;
+            const backwards = (this.flipX && !this.flipZ) || (!this.flipX && this.flipZ);
+
+            if(!backwards) fromFaces.push(this.north, this.west, this.south, this.east);
+            if(backwards) fromFaces.push(this.south, this.west, this.north, this.east);
+
             this.transformFaceTextures(
-                [ this.north, this.west, this.south, this.east ],
+                fromFaces,
                 [ this.east, this.north, this.west, this.south ]
             );
 
@@ -261,8 +314,15 @@ export class BlockModelCuboid {
 
     public rotateTexturesZ(amount: number) {
         for(let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
+
+            const fromFaces: BlockModelFace[] = new Array;
+            const backwards = (this.flipX && !this.flipY) || (!this.flipX && this.flipY);
+
+            if(!backwards) fromFaces.push(this.down, this.east, this.up, this.west);
+            if(backwards) fromFaces.push(this.up, this.east, this.down, this.west);
+
             this.transformFaceTextures(
-                [ this.down, this.east, this.up, this.west ],
+                fromFaces,
                 [ this.west, this.down, this.east, this.up ]
             );
 
