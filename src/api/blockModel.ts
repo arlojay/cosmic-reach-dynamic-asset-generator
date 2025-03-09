@@ -106,9 +106,9 @@ export class BlockModelCuboid {
         this.flipY = minY > maxY;
         this.flipZ = minZ > maxZ;
         
-        [ minX, maxX ] = [ minX, maxX ].sort();
-        [ minY, maxY ] = [ minY, maxY ].sort();
-        [ minZ, maxZ ] = [ minZ, maxZ ].sort();
+        [ minX, maxX ] = [ minX, maxX ].sort((a, b) => a - b);
+        [ minY, maxY ] = [ minY, maxY ].sort((a, b) => a - b);
+        [ minZ, maxZ ] = [ minZ, maxZ ].sort((a, b) => a - b);
 
         this.box.set(
             new Vector3(minX, minY, minZ),
@@ -306,8 +306,6 @@ export class BlockModelCuboid {
             );
 
             this.up.rotate(-90);
-            this.north.rotate(-90);
-            this.south.rotate(90);
             this.down.rotate(90);
         }
     }
