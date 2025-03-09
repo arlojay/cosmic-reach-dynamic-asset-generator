@@ -30,7 +30,13 @@ export interface SerializedBlockbenchModel {
     elements: SerializedBlockbenchElement[];
     textures: SerializedBlockbenchTexture[];
 }
-export async function loadBlockbenchModel(mod: Mod, id: string, path: string) {
+export interface BlockbenchImportOptions {
+    importTextures?: boolean;
+}
+export async function loadBlockbenchModel(mod: Mod, id: string, path: string, options?: BlockbenchImportOptions) {
+    options ??= {};
+    options.importTextures ??= true;
+
     const data: SerializedBlockbenchModel = JSON.parse(fs.readFileSync(path).toString());
     const blockModel = mod.createBlockModel(id);
 
@@ -40,7 +46,10 @@ export async function loadBlockbenchModel(mod: Mod, id: string, path: string) {
     let textureIndex = 0;
     for await(const textureData of data.textures) {
         const fileName = textureData.name.split(".");
-        const texture = await Texture.loadFromFile(fileName.slice(0, -1).join("."), textureData.source);
+        const textureName = fileName.slice(0, -1).join(".");
+        const texture = options.importTextures
+            ? await Texture.loadFromFile(textureName, textureData.source)
+            : new Texture(textureName, "base:textures/blocks/debug.png")
         textures.set(textureIndex++, texture);
     }
 
