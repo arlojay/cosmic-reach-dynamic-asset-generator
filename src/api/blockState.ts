@@ -4,7 +4,8 @@ import { Identifier } from "./identifier";
 import { Texture } from "./texture";
 import { Mod } from "./mod";
 import { TriggerSheet } from "./triggerSheet";
-import { LangKey, LangKeyLanguage } from "./lang";
+import { LangKey } from "./lang";
+import { BlockStateGeneratorEntry } from "./blockStateGenerator";
 
 export interface SerializedBlockState {
     modelName: string;
@@ -55,7 +56,7 @@ export class BlockState {
     public canRaycastForReplace: boolean | null = null; // default false
     public walkThrough: boolean | null = null; // default false
     public tags: string[] = new Array;
-    public stateGenerators: string[] = new Array;
+    public stateGenerators: Set<BlockStateGeneratorEntry | Identifier | string> = new Set;
     public placementRules: "default" | "stairs" | "directional_towards" | "directional_away" | "omnidirectional_towards" | "omnidirectional_away" | "axis" | null = null;
     public hardness: number | null = null; // default 1?
     public dropState: BlockState | null = null;
@@ -80,8 +81,12 @@ export class BlockState {
     }
 
     public createBlockModel(id?: string) {
-        const model = this.mod.createBlockModel(id ?? 
-            (this.block.id.getItem() + "/" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_"))
+        const model = new BlockModel(
+            this.mod,
+            new Identifier(
+                this.mod,
+                id ?? (this.block.id.getItem() + "/" + this.compileParams("-", "_"))
+            )
         );
 
         this.model = model;
@@ -94,8 +99,12 @@ export class BlockState {
     }
 
     public createTriggerSheet(id?: string) {
-        const triggerSheet = this.mod.createTriggerSheet(id ??
-            (this.block.id.getItem() + "/" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_"))
+        const triggerSheet = new TriggerSheet(
+            this.mod,
+            new Identifier(
+                this.mod,
+                id ?? (this.block.id.getItem() + "/" + this.compileParams("-", "_"))
+            )
         );
 
         this.triggerSheet = triggerSheet;
@@ -107,14 +116,14 @@ export class BlockState {
         this.triggerSheet = triggerSheet;
     }
 
-    public compileParams() {
+    public compileParams(assigner: string = "=", delimiter: string = ",") {
         return Array.from(this.params).map(v => {
             if(v[1] == null || v[1].length == 0) return v[0];
-            return v.join("=");
-        }).join(",");
+            return v.join(assigner);
+        }).join(delimiter);
     }
 
-    public createLangKey(id: string = this.block.id.getItem() + "::" + this.compileParams().replace(/\=/g, "-").replace(/\,/g, "_")) {
+    public createLangKey(id: string = this.block.id.getItem() + "::" + this.compileParams("-", "_")) {
         this.langKey = this.mod.langMap.createBlockKey(id);
         return this.langKey;
     }
@@ -172,6 +181,9 @@ export class BlockState {
         return object;
     }
     
+    public getBlock() {
+        return this.block;
+    }
     public getFullId(): string {
         return this.block.getBlockId() + "[" + this.compileParams() + "]";
     }
