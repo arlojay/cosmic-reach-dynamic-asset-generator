@@ -12,6 +12,7 @@ export interface SerializedBlockbenchElement {
     from: [ number, number, number ];
     to: [ number, number, number ];
     autouv: number;
+    inflate?: number;
     faces: {
         north: SerializedBlockbenchFace;
         east: SerializedBlockbenchFace;
@@ -45,7 +46,11 @@ export async function loadBlockbenchModel(mod: Mod, id: string, path: string) {
 
     for(const element of data.elements) {
         const cuboid = blockModel.createCuboid();
-        cuboid.setSize(...element.from, ...element.to, false);
+        const inflate = element.inflate ?? 0;
+        cuboid.setSize(
+            element.from[0] - inflate, element.from[1] - inflate, element.from[2] - inflate,
+            element.to[0] + inflate, element.to[1] + inflate, element.to[2] + inflate,
+        false);
 
         for(const faceId in element.faces) {
             const elementFace: SerializedBlockbenchFace = element.faces[faceId];
@@ -57,6 +62,7 @@ export async function loadBlockbenchModel(mod: Mod, id: string, path: string) {
             } else {
                 cuboidFace.texture = textures.get(elementFace.texture);
             }
+
             cuboidFace.uvMin.set(elementFace.uv[0], elementFace.uv[1]);
             cuboidFace.uvMax.set(elementFace.uv[2], elementFace.uv[3]);
         }
