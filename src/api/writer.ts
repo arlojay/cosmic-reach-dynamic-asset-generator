@@ -106,7 +106,7 @@ export class Writer {
         let includedBlockModels = 0;
         do {
             includedBlockModels = 0;
-            for(const blockModel of this.mod.blockModels) {
+            for(const blockModel of Array.from(this.mod.blockModels).concat(Array.from(usedBlockModels))) {
                 if(!usedBlockModels.has(blockModel)) continue;
                 if(!(blockModel.parent instanceof BlockModel)) continue;
 
@@ -139,7 +139,7 @@ export class Writer {
         let includedTriggerSheets = 0;
         do {
             includedTriggerSheets = 0;
-            for(const triggerSheet of this.mod.triggerSheets) {
+            for(const triggerSheet of Array.from(this.mod.triggerSheets).concat(Array.from(usedTriggerSheets))) {
                 if(!usedTriggerSheets.has(triggerSheet)) continue;
                 if(!(triggerSheet.parent instanceof TriggerSheet)) continue;
 
