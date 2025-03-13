@@ -54,7 +54,8 @@ export class RunTriggerAction extends TriggerAction<{
     yOff?: number;
     zOff?: number;
     tickDelay?: number;
-    queue?: boolean;
+    addToQueue?: boolean;
+    createSubqueue?: boolean;
 }> {
     public name: string = "base:run_trigger";
 }
