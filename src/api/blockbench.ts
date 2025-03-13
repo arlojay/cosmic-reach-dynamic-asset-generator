@@ -57,9 +57,11 @@ export async function loadBlockbenchModel(mod: Mod, id: string, path: string, op
         const cuboid = blockModel.createCuboid();
         const inflate = element.inflate ?? 0;
         cuboid.setSize(
-            element.from[0] - inflate, element.from[1] - inflate, element.from[2] - inflate,
-            element.to[0] + inflate, element.to[1] + inflate, element.to[2] + inflate,
+            element.from[0], element.from[1], element.from[2],
+            element.to[0], element.to[1], element.to[2],
         false);
+
+        if(inflate != 0) cuboid.inflate = inflate;
 
         for(const faceId in element.faces) {
             const elementFace: SerializedBlockbenchFace = element.faces[faceId];

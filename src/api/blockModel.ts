@@ -89,7 +89,8 @@ export interface SerializedBlockModelCuboid {
         localPosY?: SerializedBlockModelFace,
         localNegZ?: SerializedBlockModelFace,
         localPosZ?: SerializedBlockModelFace
-    }
+    },
+    inflate?: number
 }
 
 export class BlockModelCuboid {
@@ -104,6 +105,8 @@ export class BlockModelCuboid {
     public north = new BlockModelFace;
     public down = new BlockModelFace;
     public up = new BlockModelFace;
+
+    public inflate: number = null;
 
     public constructor() {
         this.recalculateUVs();
@@ -242,6 +245,8 @@ export class BlockModelCuboid {
         cuboid.flipY = this.flipY;
         cuboid.flipZ = this.flipZ;
 
+        cuboid.inflate = this.inflate;
+
         return cuboid;
     }
 
@@ -255,6 +260,8 @@ export class BlockModelCuboid {
             ],
             faces: {}
         };
+
+        if(this.inflate != null) object.inflate = this.inflate;
         
         if(this.west.texture != null) {
             object.faces.localNegX = this.west.serialize(textureIds.get(this.west.texture));
