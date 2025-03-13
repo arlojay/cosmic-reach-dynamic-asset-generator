@@ -46,6 +46,15 @@ export class BlockModelFace {
         return face;
     }
 
+    public copy(other: BlockModelFace) {
+        this.receiveAO = other.receiveAO;
+        this.texture = other.texture;
+        this.uvMin = other.uvMin.clone();
+        this.uvMax = other.uvMax.clone();
+        this.cull = other.cull;
+        this.uvRotation = other.uvRotation;
+    }
+
     public flipVertical() {
         [ this.uvMin.y, this.uvMax.y ] = [ this.uvMax.y, this.uvMin.y ];
         if(this.uvRotation == 270) this.uvRotation = 90;
@@ -84,7 +93,7 @@ export interface SerializedBlockModelCuboid {
 }
 
 export class BlockModelCuboid {
-    public box: Box3 = new Box3(new Vector3(0, 0, 0), new Vector3(16, 16, 16));
+    private box: Box3 = new Box3(new Vector3(0, 0, 0), new Vector3(16, 16, 16));
     private flipX: boolean = false;
     private flipY: boolean = false;
     private flipZ: boolean = false;
@@ -189,6 +198,10 @@ export class BlockModelCuboid {
         ];
     }
 
+    public copyBox(destination: Box3) {
+        destination.copy(this.box);
+    }
+
     public applyTransformation(transformation: Matrix4) {
         this.box.applyMatrix4(transformation);
 
@@ -269,80 +282,74 @@ export class BlockModelCuboid {
         return new Set(this.getAllFaces().map(v => v.texture).filter(v => v != null));
     }
 
-    public rotateTexturesX(amount: number) {
+    public rotateFacesX(amount: number) {
+        const toFaces: BlockModelFace[] = new Array;
+        const backwards = (this.flipY && !this.flipZ) || (!this.flipY && this.flipZ);
+
+        if(!backwards) toFaces.push(this.down, this.south, this.up, this.north);
+        if(backwards) toFaces.push(this.up, this.north, this.down, this.south);
+
         for(let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
-
-            const fromFaces: BlockModelFace[] = new Array;
-            const backwards = (this.flipY && !this.flipZ) || (!this.flipY && this.flipZ);
-
-            if(!backwards) fromFaces.push(this.north, this.down, this.south, this.up);
-            if(backwards) fromFaces.push(this.south, this.down, this.north, this.up);
-
             this.transformFaceTextures(
-                fromFaces,
-                [ this.up, this.north, this.down, this.south ]
+                [ this.north, this.down, this.south, this.up ],
+                toFaces
             );
 
-            this.down.flipVertical();
-            this.up.flipVertical();
+            this.up.rotate(180);
+            this.down.rotate(180);
+            this.north.rotate(180);
 
             this.east.rotate(90);
             this.west.rotate(-90);
         }
     }
 
-    public rotateTexturesY(amount: number) {
+    public rotateFacesY(amount: number) {
+        const toFaces: BlockModelFace[] = new Array;
+        const backwards = (this.flipX && !this.flipZ) || (!this.flipX && this.flipZ);
+
+        if(!backwards) toFaces.push(this.east, this.south, this.west, this.north);
+        if(backwards) toFaces.push(this.west, this.north, this.east, this.south);
+
         for(let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
-
-            const fromFaces: BlockModelFace[] = new Array;
-            const backwards = (this.flipX && !this.flipZ) || (!this.flipX && this.flipZ);
-
-            if(!backwards) fromFaces.push(this.north, this.west, this.south, this.east);
-            if(backwards) fromFaces.push(this.south, this.west, this.north, this.east);
-
             this.transformFaceTextures(
-                fromFaces,
-                [ this.east, this.north, this.west, this.south ]
+                [ this.north, this.east, this.south, this.west ],
+                toFaces
             );
 
-            this.up.rotate(-90);
-            this.down.rotate(90);
+            this.up.rotate(90);
+            this.down.rotate(-90);
         }
     }
 
-    public rotateTexturesZ(amount: number) {
+    public rotateFacesZ(amount: number) {
+        const toFaces: BlockModelFace[] = new Array;
+        const backwards = (this.flipX && !this.flipY) || (!this.flipX && this.flipY);
+
+        if(!backwards) toFaces.push(this.east, this.down, this.west, this.up);
+        if(backwards) toFaces.push(this.west, this.up, this.east, this.down);
+        
         for(let i = 0; i < (amount % 360 + 360) % 360; i += 90) {
-
-            const fromFaces: BlockModelFace[] = new Array;
-            const backwards = (this.flipX && !this.flipY) || (!this.flipX && this.flipY);
-
-            if(!backwards) fromFaces.push(this.down, this.east, this.up, this.west);
-            if(backwards) fromFaces.push(this.up, this.east, this.down, this.west);
-
             this.transformFaceTextures(
-                fromFaces,
-                [ this.west, this.down, this.east, this.up ]
+                [ this.up, this.east, this.down, this.west ],
+                toFaces
             );
 
-            this.east.rotate(-90);
-            this.east.flipVertical();
             this.up.rotate(90);
+            this.east.rotate(90);
+            this.down.rotate(90);
             this.west.rotate(90);
-            this.west.flipVertical();
-            this.down.rotate(-90);
 
-            this.north.rotate(90);
-            this.south.rotate(-90);
+            this.south.rotate(90);
+            this.north.rotate(-90);
         }
     }
 
     private transformFaceTextures(fromFaces: BlockModelFace[], toFaces: BlockModelFace[]) {
-        const toFacesClone = toFaces.map(face => face.clone());
+        const fromFacesClone = fromFaces.map(face => face.clone());
 
-        for(let i = 0; i < Math.min(fromFaces.length, toFaces.length); i++) {
-            fromFaces[i].texture = toFacesClone[i].texture;
-            fromFaces[i].uvMin = toFacesClone[i].uvMin;
-            fromFaces[i].uvMax = toFacesClone[i].uvMax;
+        for(let i = 0; i < Math.min(toFaces.length, fromFaces.length); i++) {
+            toFaces[i].copy(fromFacesClone[i]);
         }
     }
 }
@@ -399,7 +406,10 @@ export class BlockModel {
 
     public createCuboid(box: Box3 = new Box3(new Vector3(0, 0, 0), new Vector3(16, 16, 16))) {
         const cuboid = new BlockModelCuboid();
-        cuboid.box.copy(box);
+        cuboid.setSize(
+            box.min.x, box.min.y, box.min.z,
+            box.max.x, box.max.y, box.max.z,
+        );
         cuboid.recalculateUVs();
         cuboid.recalculateCullFaces();
 
@@ -545,7 +555,7 @@ export class BlockModel {
         this.applyTransformation(transformation);
 
         for(const cuboid of this.cuboids) {
-            cuboid.rotateTexturesX(amount);
+            cuboid.rotateFacesX(amount);
         }
 
         return this;
@@ -555,17 +565,17 @@ export class BlockModel {
         this.applyTransformation(transformation);
 
         for(const cuboid of this.cuboids) {
-            cuboid.rotateTexturesY(amount);
+            cuboid.rotateFacesY(amount);
         }
 
         return this;
     }
     public rotateZ(amount: number) {
-        const transformation = new Matrix4().makeRotationFromEuler(new Euler(0, 0, amount * Math.PI / 180));
+        const transformation = new Matrix4().makeRotationFromEuler(new Euler(0, 0, -amount * Math.PI / 180));
         this.applyTransformation(transformation);
 
         for(const cuboid of this.cuboids) {
-            cuboid.rotateTexturesZ(amount);
+            cuboid.rotateFacesZ(amount);
         }
 
         return this;
