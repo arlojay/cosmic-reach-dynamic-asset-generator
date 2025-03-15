@@ -40,7 +40,7 @@ export abstract class BasicBlock {
 
         const model = state.createBlockModel(this.id);
         model.setParent(new Identifier("base", "cube"));
-        model.transparent = !this.isOpaque;
+        model.usesTransparency = !this.isOpaque;
         if(this.cullsSelf != null) model.cullsSelf = this.cullsSelf;
         await this.overrideTextures(model);
 

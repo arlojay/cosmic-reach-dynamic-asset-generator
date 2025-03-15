@@ -380,8 +380,8 @@ export class BlockModel {
     private textureOverrides: Map<string, Texture> = new Map;
 
     public id: Identifier;
-    public cullsSelf: boolean = null;
-    public transparent: boolean = null;
+    public cullsSelf: boolean = null; // default true
+    public usesTransparency: boolean = null;
     public parent: Identifier | string | BlockModel = null;
 
     public constructor(mod: Mod = null, id: Identifier = new Identifier(mod, BlockModel.nextTempModelName())) {
@@ -464,7 +464,7 @@ export class BlockModel {
         model.addCuboid(...this.getCuboids().map(cuboid => cuboid.clone()))
         model.parent = this.parent;
         model.cullsSelf = this.cullsSelf;
-        model.transparent = this.transparent;
+        model.usesTransparency = this.usesTransparency;
         return model;
     }
 
@@ -542,7 +542,7 @@ export class BlockModel {
         if(cuboids.length > 0) object.cuboids = cuboids.map(cuboid => cuboid.serialize(textureIds));
 
         if(this.cullsSelf != null) object.cullsSelf = this.cullsSelf;
-        if(this.transparent != null) object.isTransparent = this.transparent;
+        if(this.usesTransparency != null) object.isTransparent = this.usesTransparency;
 
         if(this.parent != null) {
             if(this.parent instanceof BlockModel) {
