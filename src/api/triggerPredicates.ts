@@ -21,6 +21,7 @@ export interface ILogicPredicate {
     and?: TriggerPredicate<any>[];
     xor?: TriggerPredicate<any>[];
     not?: TriggerPredicate<any>;
+    random?: RandomPredicate;
 }
 
 export class BlockEventPredicate extends TriggerPredicate<IBlockEventPredicate> { }
@@ -55,4 +56,9 @@ export interface IPlayerGamemodePredicate {
 export class PlayerPredicate extends TriggerPredicate<IPlayerPredicate> { }
 export interface IPlayerPredicate {
     gamemode: PlayerGamemodePredicate;
+}
+
+export class RandomPredicate extends TriggerPredicate<IRandomPredicate>{ }
+export interface IRandomPredicate {
+    normalChance: number;
 }
