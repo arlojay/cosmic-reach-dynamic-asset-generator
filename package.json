@@ -1,6 +1,6 @@
 {
   "name": "cosmic-reach-dag",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "A modern dynamic asset generator for Cosmic Reach",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
