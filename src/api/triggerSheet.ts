@@ -35,6 +35,10 @@ export class TriggerSheet {
         this.parent = parent;
     }
 
+    public onUpdate(...triggers: TriggerAction[]) {
+        this.addTrigger("relayOnBlockUpdate", ...triggers);
+    }
+
     public addTrigger(id: string, ...triggers: TriggerAction[]) {
         const triggerList = this.triggers.get(id) ?? new Array;
 

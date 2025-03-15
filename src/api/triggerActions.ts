@@ -60,6 +60,21 @@ export class RunTriggerAction extends TriggerAction<{
     public name: string = "base:run_trigger";
 }
 
+export class UpdateBlockAction extends TriggerAction<{
+    xOff?: number;
+    yOff?: number;
+    zOff?: number;
+    tickDelay?: number;
+    addToQueue?: boolean;
+    createSubqueue?: boolean;
+}> {
+    public name: string = "base:run_trigger";
+    protected modifyParams(params: any): void {
+        if(params == null) params = {};
+        params.triggerId = "relayOnBlockUpdate";
+    }
+}
+
 export class BlockEntitySignalAction extends TriggerAction<{
     xOff?: number;
     yOff?: number;

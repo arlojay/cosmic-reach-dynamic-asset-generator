@@ -1,4 +1,5 @@
-import { ItemDropAction, ReplaceBlockStateAction, RunTriggerAction } from "./triggerActions";
+import { Directions } from "./directions";
+import { ItemDropAction, ReplaceBlockStateAction, RunTriggerAction, UpdateBlockAction } from "./triggerActions";
 import { BlockEventPredicate, PlayerGamemodePredicate, PlayerPredicate } from "./triggerPredicates";
 import { TriggerSheet } from "./triggerSheet";
 
@@ -21,7 +22,13 @@ export function addDefaultBreakEvents(sheet: TriggerSheet) {
                 })
             })
         }))
-    )
+    );
+
+    for(const direction of Directions.cardinals) {
+        sheet.addTrigger("onBreak",
+            new UpdateBlockAction({ xOff: direction.x, yOff: direction.y, zOff: direction.z })
+        );
+    }
 }
 export function addDefaultPlaceEvents(sheet: TriggerSheet) {
     sheet.addTrigger("onPlace",
@@ -31,8 +38,14 @@ export function addDefaultPlaceEvents(sheet: TriggerSheet) {
         }),
         new RunTriggerAction({
             triggerId: "relayPlayPlaceSound"
-        })
-    )
+        }),
+        new UpdateBlockAction()
+    );
+    for(const direction of Directions.cardinals) {
+        sheet.addTrigger("onPlace",
+            new UpdateBlockAction({ xOff: direction.x, yOff: direction.y, zOff: direction.z })
+        );
+    }
 }
 
 export function addDefaultEvents(sheet: TriggerSheet) {
