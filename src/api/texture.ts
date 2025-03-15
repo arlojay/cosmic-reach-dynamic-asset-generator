@@ -42,4 +42,9 @@ export class Texture {
         ctx.drawImage(this.texture, 0, 0);
         return canvas.createPNGStream();
     }
+    public getImage() {
+        if(this.texture instanceof Image) return this.texture;
+
+        return null;
+    }
 }
