@@ -124,16 +124,24 @@ export class Writer {
             for(const texture of joinIterators(blockModel.getUsedTextures().values(), blockModel.getTextureOverrides().values())) {
                 if(writtenBlockTextures.has(texture)) continue;
                 if(texture.texture instanceof Image) {
-                    this.writeFile(
-                        path.join(directory, texture.getAsBlockTexturePath()),
-                        texture.createTextureStream()
-                    );
+                    try {
+                        this.writeFile(
+                            path.join(directory, texture.getAsBlockTexturePath()),
+                            texture.createTextureStream()
+                        );
+                    } catch(e) {
+                        throw new Error("Error while processing block texture " + texture.getAsBlockTextureId(this.mod), { cause: e });
+                    }
                 }
 
                 writtenBlockTextures.add(texture);
             }
 
-            this.writeFile(modelPath, blockModel.serialize());
+            try {
+                this.writeFile(modelPath, blockModel.serialize());
+            } catch(e) {
+                throw new Error("Error while processing block model " + blockModel.getBlockModelId(), { cause: e });
+            }
         }
         
         let includedTriggerSheets = 0;
@@ -156,7 +164,11 @@ export class Writer {
 
             if(!usedTriggerSheets.has(triggerSheet)) continue;
 
-            this.writeFile(triggerSheetPath, triggerSheet.serialize());
+            try {
+                this.writeFile(triggerSheetPath, triggerSheet.serialize());
+            } catch(e) {
+                throw new Error("Error while processing trigger sheet " + triggerSheet.getTriggerSheetId(), { cause: e });
+            }
 
             const sounds = triggerSheet.getAllSoundInstances();
             for(const sound of sounds) {
@@ -164,7 +176,11 @@ export class Writer {
 
                 const soundsPath = path.join(directory, sound.getAsBlockSoundPath());
 
-                this.writeFile(soundsPath, sound.createOggStream());
+                try {
+                    this.writeFile(soundsPath, sound.createOggStream());
+                } catch(e) {
+                    throw new Error("Error while processing block sound " + sound.getAsBlockSoundId(this.mod), { cause: e });
+                }
             }
         }
 
@@ -176,28 +192,44 @@ export class Writer {
             const texture = item.texture;
 
             if(texture.texture instanceof Image) {
-                if(!writtenItemTextures.has(texture)) this.writeFile(
-                    path.join(directory, texture.getAsItemTexturePath()),
-                    texture.createTextureStream()
-                );
+                try {
+                    if(!writtenItemTextures.has(texture)) this.writeFile(
+                        path.join(directory, texture.getAsItemTexturePath()),
+                        texture.createTextureStream()
+                    );
+                } catch(e) {
+                    throw new Error("Error while processing item texture " + texture.getAsItemTextureId(this.mod), { cause: e });
+                }
             }
 
             writtenItemTextures.add(texture);
 
-            this.writeFile(itemPath, item.serialize());
+            try {
+                this.writeFile(itemPath, item.serialize());
+            } catch(e) {
+                throw new Error("Error while processing item " + item.getItemId(), { cause: e });
+            }
         }
 
         for(const craftingRecipe of this.mod.crafting.craftingRecipes) {
-            this.writeFile(
-                path.join(directory, craftingRecipe.getRecipePath().toString()),
-                craftingRecipe.serialize()
-            );
+            try {
+                this.writeFile(
+                    path.join(directory, craftingRecipe.getRecipePath().toString()),
+                    craftingRecipe.serialize()
+                );
+            } catch(e) {
+                throw new Error("Error while processing crafting recipe " + craftingRecipe.id.toString(), { cause: e });
+            }
         }
         for(const furnaceRecipe of this.mod.crafting.furnaceRecipes) {
-            this.writeFile(
-                path.join(directory, furnaceRecipe.getRecipePath().toString()),
-                furnaceRecipe.serialize()
-            );
+            try {
+                this.writeFile(
+                    path.join(directory, furnaceRecipe.getRecipePath().toString()),
+                    furnaceRecipe.serialize()
+                );
+            } catch(e) {
+                throw new Error("Error while processing furnace recipe " + furnaceRecipe.id.toString(), { cause: e });
+            }
         }
 
         const langMap = this.mod.langMap.serialize();
@@ -208,14 +240,18 @@ export class Writer {
 
             if(language == null) continue;
 
-            this.writeFile(
-                path.join(directory, "lang", languageName, this.mod.id + "_items.json"),
-                language.items
-            );
-            this.writeFile(
-                path.join(directory, "lang", languageName, this.mod.id + "_blocks.json"),
-                language.blocks
-            );
+            try {
+                this.writeFile(
+                    path.join(directory, "lang", languageName, this.mod.id + "_items.json"),
+                    language.items
+                );
+                this.writeFile(
+                    path.join(directory, "lang", languageName, this.mod.id + "_blocks.json"),
+                    language.blocks
+                );
+            } catch(e) {
+                throw new Error("Error while processing language " + languageName, { cause: e });
+            }
         }
     }
 }
