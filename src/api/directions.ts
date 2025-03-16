@@ -207,6 +207,30 @@ export class Directions {
         new Direction("down", 0, -1, 0),
     ]);
 
+    public static rings = new DirectionMap([
+        new Direction("north", 0, 0, -1),
+        new Direction("east", 1, 0, 0),
+        new Direction("south", 0, 0, 1),
+        new Direction("west", -1, 0, 0),
+        new Direction("up", 0, 1, 0),
+        new Direction("down", 0, -1, 0),
+
+        new Direction("northeast", 1, 0, -1),
+        new Direction("northwest", -1, 0, -1),
+        new Direction("northup", 0, 1, -1),
+        new Direction("northdown", 0, -1, -1),
+
+        new Direction("southeast", 1, 0, 1),
+        new Direction("southwest", -1, 0, 1),
+        new Direction("southup", 0, 1, 1),
+        new Direction("southdown", 0, -1, 1),
+        
+        new Direction("upeast", 1, 1, 0),
+        new Direction("upwest", -1, 1, 0),
+        new Direction("downeast", 1, -1, 0),
+        new Direction("downwest", -1, -1, 0),
+    ]);
+
     public static relative = new DirectionMap([
         new Direction("front", 0, 0, -1),
         new Direction("right", 1, 0, 0),
