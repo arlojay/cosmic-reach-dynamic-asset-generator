@@ -38,9 +38,13 @@ export class TriggerAction<SerializedData extends Record<string, any> = {}> {
             actionId: this.name
         };
         if(this.condition != null) object.if = this.condition;
-        if(this.parameters != null) {
-            const shallowParameterClone = Object.assign({}, this.parameters);
-            this.modifyParams(shallowParameterClone);
+        
+        const shallowParameterClone = this.parameters == null ? {}
+            : Object.assign({}, this.parameters);
+
+        this.modifyParams(shallowParameterClone);
+
+        if(Object.keys(shallowParameterClone).length > 0) {
             object.parameters = shallowParameterClone;
         }
 
