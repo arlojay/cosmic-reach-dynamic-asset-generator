@@ -77,6 +77,7 @@ export class RunTriggerAction extends TriggerAction<{
     tickDelay?: number;
     addToQueue?: boolean;
     createSubqueue?: boolean;
+    updateSrcBlockState?: boolean;
 }> {
     public name: string = "base:run_trigger";
 }
