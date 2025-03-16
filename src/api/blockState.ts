@@ -6,6 +6,7 @@ import { Mod } from "./mod";
 import { TriggerSheet } from "./triggerSheet";
 import { LangKey } from "./lang";
 import { BlockStateGeneratorEntry } from "./blockStateGenerator";
+import { BlockEventPredicate, IBlockEventPredicate } from "./triggerPredicates";
 
 export interface SerializedBlockState {
     modelName: string;
@@ -32,7 +33,8 @@ export interface SerializedBlockState {
     friction?: number;
     langKey?: string;
     bounciness?: number;
-    canPlace?: boolean;
+    canPlace?: IBlockEventPredicate;
+    rotation?: [ number, number, number ];
     rotXZ?: number;
     dropParams?: Record<string, string>;
     allowSwapping?: boolean;
@@ -49,31 +51,32 @@ export class BlockState {
 
     public model: BlockModel;
     public triggerSheet: TriggerSheet = null;
-    public isOpaque: boolean | null = null; // default true
-    public lightAttenuation: number | null = null; // default 15
-    public canRaycastForBreak: boolean | null = null; // default true
-    public canRaycastForPlaceOn: boolean | null = null; // default true
-    public canRaycastForReplace: boolean | null = null; // default false
-    public walkThrough: boolean | null = null; // default false
+    public isOpaque: boolean = null; // default true
+    public lightAttenuation: number = null; // default 15
+    public canRaycastForBreak: boolean = null; // default true
+    public canRaycastForPlaceOn: boolean = null; // default true
+    public canRaycastForReplace: boolean = null; // default false
+    public walkThrough: boolean = null; // default false
     public tags: string[] = new Array;
     public stateGenerators: Set<BlockStateGeneratorEntry | Identifier | string> = new Set;
-    public placementRules: "default" | "stairs" | "directional_towards" | "directional_away" | "omnidirectional_towards" | "omnidirectional_away" | "axis" | null = null;
-    public hardness: number | null = null; // default 1?
-    public dropState: BlockState | null = null;
-    public catalogHidden: boolean | null = null;
-    public fuelTicks: number | null = null; // part of intProperties.fuelTicks for some reason
-    public light: [ number, number, number ] | null = null;
-    public swapGroupId: Identifier | null = null;
-    public friction: number | null = null; // default 1?
-    public langKey: LangKey | null = null;
-    public bounciness: number | null = null; // default 0
-    public canPlace: null = null; // TODO
-    public rotXZ: number | null = null; // default 0, valid: 0, 90, 180, 270
+    public placementRules: "default" | "stairs" | "directional_towards" | "directional_away" | "omnidirectional_towards" | "omnidirectional_away" | "axis" = null;
+    public hardness: number = null; // default 1?
+    public dropState: BlockState = null;
+    public catalogHidden: boolean = null;
+    public fuelTicks: number = null; // part of intProperties.fuelTicks for some reason
+    public light: [ number, number, number ] = null;
+    public swapGroupId: Identifier = null;
+    public friction: number = null; // default 1?
+    public langKey: LangKey = null;
+    public bounciness: number = null; // default 0
+    public canPlace: BlockEventPredicate = null;
+    public rotation: [ number, number, number ] = null;
+    public rotXZ: number = null; // default 0, valid: 0, 90, 180, 270
     public dropParamOverrides: Record<string, string>;
-    public allowSwapping: boolean | null = null; // default true
-    public isFluid: boolean | null = null;
-    public itemIcon: Texture | null = null;
-    public refractiveIndex: number | null = null;
+    public allowSwapping: boolean = null; // default true
+    public isFluid: boolean = null;
+    public itemIcon: Texture = null;
+    public refractiveIndex: number = null;
 
     public constructor(mod: Mod, block: Block<any>) {
         this.mod = mod;
@@ -138,6 +141,14 @@ export class BlockState {
         };
 
         if(this.rotXZ != null) object.rotXZ = this.rotXZ;
+        if(this.rotation != null) {
+            object.rotation = this.rotation;
+
+            // TO FIX A BUG IN THE GAME
+            object.rotXZ ??= 0;
+            object.rotXZ += object.rotation[1];
+            object.rotation[1] = 0;
+        }
         if(this.triggerSheet != null) object.blockEventsId = this.triggerSheet.getTriggerSheetId().toString();
         if(this.canPlace != null) object.canPlace = this.canPlace;
 
