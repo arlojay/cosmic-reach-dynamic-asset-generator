@@ -15,6 +15,10 @@
   ],
   "author": "arlojay",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arlojay/cosmic-reach-dynamic-asset-generator"
+  },
   "devDependencies": {
     "@types/node": "^22.13.1",
     "@types/fluent-ffmpeg": "^2.1.27",
