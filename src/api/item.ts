@@ -1,7 +1,17 @@
+import { BlockState } from "./blockState";
 import { Identifier } from "./identifier";
 import { LangKey } from "./lang";
 import { Mod } from "./mod";
 import { Texture } from "./texture";
+
+export type ItemLike = Item | BlockState | Identifier | string;
+
+export function itemLikeToString(item: ItemLike) {
+    if (item instanceof Item) return item.id.toString();
+    if (item instanceof BlockState) return item.getFullId();
+    return item?.toString?.() ?? `${item}`;
+}
+
 
 export type ItemModelType = "base:item3D" | "base:item2D";
 

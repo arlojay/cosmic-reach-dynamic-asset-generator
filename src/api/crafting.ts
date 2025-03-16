@@ -1,17 +1,7 @@
-import { BlockState } from "./blockState";
 import { CraftingRecipeList } from "./craftingRecipe";
 import { FurnaceRecipeList } from "./furnaceRecipe";
 import { Identifier } from "./identifier";
-import { Item } from "./item";
 import { Mod } from "./mod";
-
-export type ItemLike = Item | BlockState | Identifier | string;
-
-export function itemLikeToString(item: ItemLike) {
-    if(item instanceof Item) return item.id.toString();
-    if(item instanceof BlockState) return item.getFullId();
-    return item?.toString?.() ?? `${item}`;
-}
 
 export class Crafting {
     private mod: Mod;

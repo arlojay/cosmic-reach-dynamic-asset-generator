@@ -1,7 +1,7 @@
 import { Block } from "../block";
 import { BlockModel } from "../blockModel";
 import { BlockState } from "../blockState";
-import { ItemLike } from "../crafting";
+import { ItemLike } from "../item";
 import { Identifier } from "../identifier";
 import { LangKey } from "../lang";
 import { Mod } from "../mod";

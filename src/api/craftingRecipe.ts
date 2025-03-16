@@ -1,5 +1,6 @@
 import { Box2, Matrix3, Vector2 } from "three";
-import { ItemLike, itemLikeToString } from "./crafting";
+import { itemLikeToString } from "./item";
+import { ItemLike } from "./item";
 import { Identifier } from "./identifier";
 import { Item } from "./item";
 import { BlockState } from "./blockState";

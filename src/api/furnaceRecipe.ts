@@ -1,4 +1,5 @@
-import { ItemLike, itemLikeToString } from "./crafting";
+import { itemLikeToString } from "./item";
+import { ItemLike } from "./item";
 import { Identifier } from "./identifier";
 
 export class FurnaceRecipe {

@@ -1,6 +1,7 @@
 import { Vector2, Vector3 } from "three";
 import { BlockState } from "./blockState";
-import { ItemLike, itemLikeToString } from "./crafting";
+import { itemLikeToString } from "./item";
+import { ItemLike } from "./item";
 import { TriggerPredicate } from "./triggerPredicates";
 import { Sound } from "./sound";
 import { Identifier } from "./identifier";
