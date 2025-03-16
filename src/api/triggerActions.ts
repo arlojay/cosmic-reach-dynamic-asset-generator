@@ -1,11 +1,27 @@
-import { Vector2, Vector3 } from "three";
-import { BlockState } from "./blockState";
+/*
+Copyright 2025 arlojay
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+import { Vector3 } from "three";
 import { itemLikeToString } from "./item";
 import { ItemLike } from "./item";
 import { TriggerPredicate } from "./triggerPredicates";
 import { Sound } from "./sound";
 import { Identifier } from "./identifier";
 import { Mod } from "./mod";
+import { LootTable } from "./loot";
 
 export interface SerializedTriggerAction {
     actionId: string;
@@ -176,9 +192,18 @@ export class ItemDropAction extends TriggerAction<{
 
 export class LootDropAction extends TriggerAction<{
     position?: [ number, number, number ];
-    lootId: string;
+    loot: LootTable | Identifier | string;
 }> {
     public name: string = "base:loot_drop";
+
+    protected modifyParams(params: any): void {
+        if(params.loot != null) {
+            if(typeof params.loot == "string") params.lootId = params.loot;
+            if(params.loot instanceof LootTable) params.lootId = params.loot.getLootId().toString();
+            if(params.loot instanceof Identifier) params.lootId = params.loot.derive("loot/" + params.loot.getItem()).toString();
+            delete params.loot;
+        }
+    }
 }
 
 export class ReplaceBlockStateAction extends TriggerAction<{

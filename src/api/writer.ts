@@ -1,16 +1,33 @@
+/*
+Copyright 2025 arlojay
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 import path from "node:path";
-import fs, { stat } from "node:fs";
+import fs from "node:fs";
 import { Mod } from "./mod";
 import { BlockModel } from "./blockModel";
 import { TriggerSheet } from "./triggerSheet";
 import { Texture } from "./texture";
 import { Stream } from "node:stream";
 import { Image } from "canvas";
-import { LangKey, LangKeyLanguage } from "./lang";
+import { LangKeyLanguage } from "./lang";
 import { $enum } from "ts-enum-util";
 import { Sound } from "./sound";
 import { inspect } from "node:util";
-import { BasicBlockStateGeneratorEntry, BlockStateGenerator, BlockStateGeneratorEntry, TemplatedBlockStateGeneratorEntry } from "./blockStateGenerator";
+import { BasicBlockStateGeneratorEntry, TemplatedBlockStateGeneratorEntry } from "./blockStateGenerator";
+import { LootTable } from "./loot";
 
 function* joinIterators<T>(iterator1: Iterable<T>, iterator2: Iterable<T>) {
     yield* iterator1;
@@ -74,6 +91,7 @@ export class Writer {
         const writtenBlockTextures: Set<Texture> = new Set;
         const writtenItemTextures: Set<Texture> = new Set;
         const writtenSounds: Set<Sound> = new Set;
+        const writtenLootTables: Set<LootTable> = new Set;
 
         for(const block of this.mod.blocks) {
             const blockPath = path.join(directory, block.getBlockPath());
@@ -180,6 +198,19 @@ export class Writer {
                     this.writeFile(soundsPath, sound.createOggStream());
                 } catch(e) {
                     throw new Error("Error while processing block sound " + sound.getAsBlockSoundId(this.mod), { cause: e });
+                }
+            }
+
+            const lootTables = triggerSheet.getAllLootTableInstances();
+            for(const lootTable of lootTables) {
+                if(writtenLootTables.has(lootTable)) continue;
+
+                const lootTablePath = path.join(directory, lootTable.getLootPath());
+
+                try {
+                    this.writeFile(lootTablePath, lootTable.serialize());
+                } catch(e) {
+                    throw new Error("Error while processing block loot table " + lootTable.getLootId(), { cause: e });
                 }
             }
         }

@@ -1,3 +1,19 @@
+/*
+Copyright 2025 arlojay
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 import { Box2, Matrix3, Vector2 } from "three";
 import { itemLikeToString } from "./item";
 import { ItemLike } from "./item";
@@ -170,7 +186,7 @@ export interface SerializedShapelessCraftingRecipe {
 }
 
 interface ShapelessCraftingRecipeEntry {
-    item: ItemLike;
+    ingredient: CraftingIngredient;
     count: number;
 }
 
@@ -179,9 +195,23 @@ export class ShapelessCraftingRecipe implements CraftingRecipe<SerializedShapele
     public result: ItemLike = null;
     public resultCount: number = 1;
 
-    public addItem(item: ItemLike, count: number = 1) {
-        if(item == null) throw new TypeError("Ingredient cannot be null");
-        this.items.add({ item, count });
+    public addItem(ingredient: CraftingIngredient | CraftingIngredientOptions | ItemLike, count: number = 1) {
+        if(ingredient == null) throw new TypeError("Ingredient cannot be null");
+
+        let instance: CraftingIngredient;
+        if(ingredient instanceof CraftingIngredient) {
+            instance = ingredient;
+        } else {
+            let options: CraftingIngredientOptions;
+            if(ingredient instanceof Item || ingredient instanceof BlockState || ingredient instanceof Identifier || typeof ingredient == "string") {
+                options = { item: ingredient };
+            } else {
+                options = ingredient as CraftingIngredientOptions;
+            }
+            instance = new CraftingIngredient(options);
+        }
+
+        this.items.add({ ingredient: instance, count });
     }
 
     public setResult(ingredient: ItemLike, count: number = this.resultCount) {
@@ -190,10 +220,27 @@ export class ShapelessCraftingRecipe implements CraftingRecipe<SerializedShapele
     }
 
     public serialize(): SerializedShapelessCraftingRecipe {
-        const inputs: Record<string, number>[] = new Array;
+        const inputs: Record<string, any>[] = new Array;
 
         for(const entry of this.items) {
-            inputs.push({ [itemLikeToString(entry.item)]: entry.count });
+            if(entry.ingredient.tag == null) {
+                inputs.push({
+                    [entry.ingredient.toString()]: entry.count
+                });
+            } else {
+                // Bug in the game
+                // inputs.push({
+                //     amount: entry.count,
+                //     and: [{
+                //         has_tag: entry.ingredient.tag
+                //     }]
+                // });
+
+                inputs.push({
+                    amount: entry.count,
+                    has_tag: entry.ingredient.tag
+                });
+            }
         }
 
         return {
