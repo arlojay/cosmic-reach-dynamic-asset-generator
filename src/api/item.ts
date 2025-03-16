@@ -3,15 +3,17 @@ import { LangKey } from "./lang";
 import { Mod } from "./mod";
 import { Texture } from "./texture";
 
-export type ItemModelType = "base:item3D";
+export type ItemModelType = "base:item3D" | "base:item2D";
 
 export interface SerializedItemProperties {
     texture: string;
     modelType: ItemModelType;
+    catalogHidden?: boolean;
     stackLimit?: number;
     toolSpeed?: number;
     durability?: number;
     effectiveBreakingTags?: string[];
+    tags?: string[];
     bounciness?: number;
     fuelTicks?: number;
 }
@@ -25,6 +27,7 @@ export class Item {
     public id: Identifier;
 
     public langKey: LangKey;
+    public catalogHidden: boolean;
 
     public texture: Texture;
     public modelType: ItemModelType = "base:item3D";
@@ -33,6 +36,7 @@ export class Item {
     public toolSpeed: number = null;
     public durability: number = null;
     public effectiveBreakingTags: string[] = new Array;
+    public tags: string[] = new Array;
 
     public bounciness: number = null;
     public fuelTicks: number = null;
@@ -61,12 +65,15 @@ export class Item {
         };
 
         if(this.stackLimit != null) object.itemProperties.stackLimit = this.stackLimit;
+        if(this.catalogHidden != null) object.itemProperties.catalogHidden = this.catalogHidden;
 
         if(this.toolSpeed != null) object.itemProperties.toolSpeed = this.toolSpeed;
         if(this.durability != null) object.itemProperties.durability = this.durability;
 
         if(this.effectiveBreakingTags.length > 0)
             object.itemProperties.effectiveBreakingTags = this.effectiveBreakingTags;
+        if(this.tags.length > 0)
+            object.itemProperties.tags = this.tags;
 
         if(this.bounciness != null) object.itemProperties.bounciness = this.bounciness;
         if(this.fuelTicks != null) object.itemProperties.fuelTicks = this.fuelTicks;
