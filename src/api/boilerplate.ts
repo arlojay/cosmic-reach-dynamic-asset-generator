@@ -1,9 +1,9 @@
 import { Directions } from "./directions";
-import { ItemDropAction, ReplaceBlockStateAction, RunTriggerAction, UpdateBlockAction } from "./triggerActions";
+import { ItemDropAction, PlaySound2DAction, ReplaceBlockStateAction, RunTriggerAction, UpdateBlockAction } from "./triggerActions";
 import { BlockEventPredicate, PlayerGamemodePredicate, PlayerPredicate } from "./triggerPredicates";
 import { TriggerSheet } from "./triggerSheet";
 
-export function addDefaultBreakEvents(sheet: TriggerSheet) {
+export function addDefaultEvents(sheet: TriggerSheet) {
     sheet.addTrigger("onBreak",
         new RunTriggerAction({
             triggerId: "relayPlayBreakSound"
@@ -21,16 +21,9 @@ export function addDefaultBreakEvents(sheet: TriggerSheet) {
                     allows_items_drop_on_break: true
                 })
             })
-        }))
+        })),
+        new RunTriggerAction({ triggerId: "relayUpdateSurroundings" })
     );
-
-    for(const direction of Directions.cardinals) {
-        sheet.addTrigger("onBreak",
-            new UpdateBlockAction({ xOff: direction.x, yOff: direction.y, zOff: direction.z })
-        );
-    }
-}
-export function addDefaultPlaceEvents(sheet: TriggerSheet) {
     sheet.addTrigger("onPlace",
         new ReplaceBlockStateAction({
             xOff: 0, yOff: 0, zOff: 0,
@@ -39,16 +32,26 @@ export function addDefaultPlaceEvents(sheet: TriggerSheet) {
         new RunTriggerAction({
             triggerId: "relayPlayPlaceSound"
         }),
-        new UpdateBlockAction()
+        new UpdateBlockAction(),
+        new RunTriggerAction({ triggerId: "relayUpdateSurroundings" })
     );
+    sheet.addTrigger("relayPlayBreakSound", new PlaySound2DAction({
+        sound: "base:sounds/blocks/block-break.ogg",
+        volume: 1,
+        pitch: [ 0.9, 1.1 ],
+        pan: 0
+    }));
+    sheet.addTrigger("relayPlayPlaceSound", new PlaySound2DAction({
+        sound: "base:sounds/blocks/block-place.ogg",
+        volume: 1,
+        pitch: [ 0.9, 1.1 ],
+        pan: 0
+    }));
     for(const direction of Directions.cardinals) {
-        sheet.addTrigger("onPlace",
-            new UpdateBlockAction({ xOff: direction.x, yOff: direction.y, zOff: direction.z })
-        );
+        sheet.addTrigger("relayUpdateSurroundings", new UpdateBlockAction({
+            xOff: direction.x,
+            yOff: direction.y,
+            zOff: direction.z
+        }));
     }
-}
-
-export function addDefaultEvents(sheet: TriggerSheet) {
-    addDefaultBreakEvents(sheet);
-    addDefaultPlaceEvents(sheet);
 }
