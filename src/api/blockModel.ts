@@ -150,12 +150,12 @@ export class BlockModelCuboid {
     }
 
     public recalculateCullFaces() {
-        this.west.cull = this.box.min.x == 0;
-        this.east.cull = this.box.max.x == 16;
-        this.north.cull = this.box.max.z == 16;
-        this.south.cull = this.box.min.z == 0;
-        this.down.cull = this.box.min.y == 0;
-        this.up.cull = this.box.max.y == 16;
+        this.west.cull = this.box.min.x == 0 && !this.flipX;
+        this.east.cull = this.box.max.x == 16 && !this.flipX;
+        this.north.cull = this.box.min.z == 16 && !this.flipZ;
+        this.south.cull = this.box.max.z == 0 && !this.flipZ;
+        this.down.cull = this.box.min.y == 0 && !this.flipY;
+        this.up.cull = this.box.max.y == 16 && !this.flipY;
     }
 
     private createRealBox() {
