@@ -19,6 +19,7 @@ import { BlockState, SerializedBlockState } from "./blockState";
 import { Identifier } from "./identifier";
 import { LangKey } from "./lang";
 import { Mod } from "./mod";
+import {BlockModel} from "./blockModel";
 
 export interface BlockProperties {
     fuelTicks: number | null;
@@ -93,6 +94,23 @@ export class Block<BlockEntityType extends BlockEntity<any> = never> {
     }
     public setDefaultLangKey(langKey: LangKey) {
         this.defaultLangKey = langKey;
+    }
+
+    public createDefaultModel(id?: string) {
+        const model = new BlockModel(
+            this.mod,
+            new Identifier(
+                this.mod,
+                id ?? (this.id.getItem())
+            )
+        );
+
+        this.fallbackParams.modelName = model.getBlockModelId().toString();
+
+        return model;
+    }
+    public setDefaultModel(blockModel: BlockModel) {
+        this.fallbackParams.modelName = blockModel.getBlockModelId().toString();
     }
 
     public serialize() {
