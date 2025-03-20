@@ -17,7 +17,6 @@ limitations under the License.
 import { BlockModel } from "./blockModel";
 import { BlockState, SerializedBlockState } from "./blockState";
 import { Identifier } from "./identifier";
-import { Mod } from "./mod";
 
 export interface SerializedBlockStateGenerator {
     stringId: string;

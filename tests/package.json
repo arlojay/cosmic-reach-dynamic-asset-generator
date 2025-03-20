@@ -1,0 +1,17 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "arlojay",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "child-process-async": "^1.0.1",
+    "cosmic-reach-dag": "file:.."
+  }
+}

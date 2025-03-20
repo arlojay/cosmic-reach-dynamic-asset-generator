@@ -1,0 +1,9 @@
+{
+    "stringId": "test:stone_breaker",
+    "blockStates": {
+        "default": {
+            "modelName": "test:models/blocks/stone_breaker/default.json",
+            "blockEventsId": "test:stone_breaker•default"
+        }
+    }
+}

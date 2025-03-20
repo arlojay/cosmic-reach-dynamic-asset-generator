@@ -5,7 +5,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "npx tsc & cd tests & node test",
+    "test": "npx tsc & cd tests & node index",
     "build": "npx tsc",
     "prepublish": "npx tsc"
   },

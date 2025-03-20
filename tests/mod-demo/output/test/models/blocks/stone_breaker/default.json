@@ -1,0 +1,14 @@
+{
+    "textures": {
+        "side": {
+            "fileName": "test:textures/blocks/stone_breaker/side.png"
+        },
+        "top": {
+            "fileName": "test:textures/blocks/stone_breaker/end.png"
+        },
+        "bottom": {
+            "fileName": "test:textures/blocks/stone_breaker/end.png"
+        }
+    },
+    "parent": "base:models/blocks/cube.json"
+}

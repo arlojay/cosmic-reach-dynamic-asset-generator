@@ -1,0 +1,110 @@
+{
+    "stringId": "test:stone_breaker•default",
+    "triggers": {
+        "onInteract": [
+            {
+                "actionId": "base:run_trigger",
+                "if": {
+                    "block_at": {
+                        "xOff": 0,
+                        "yOff": 0,
+                        "zOff": -1,
+                        "has_tag": "ore_replaceable"
+                    }
+                },
+                "parameters": {
+                    "xOff": 0,
+                    "yOff": 0,
+                    "zOff": -1,
+                    "triggerId": "onBreak"
+                }
+            },
+            {
+                "actionId": "base:run_trigger",
+                "if": {
+                    "block_at": {
+                        "xOff": 1,
+                        "yOff": 0,
+                        "zOff": 0,
+                        "has_tag": "ore_replaceable"
+                    }
+                },
+                "parameters": {
+                    "xOff": 1,
+                    "yOff": 0,
+                    "zOff": 0,
+                    "triggerId": "onBreak"
+                }
+            },
+            {
+                "actionId": "base:run_trigger",
+                "if": {
+                    "block_at": {
+                        "xOff": 0,
+                        "yOff": 0,
+                        "zOff": 1,
+                        "has_tag": "ore_replaceable"
+                    }
+                },
+                "parameters": {
+                    "xOff": 0,
+                    "yOff": 0,
+                    "zOff": 1,
+                    "triggerId": "onBreak"
+                }
+            },
+            {
+                "actionId": "base:run_trigger",
+                "if": {
+                    "block_at": {
+                        "xOff": -1,
+                        "yOff": 0,
+                        "zOff": 0,
+                        "has_tag": "ore_replaceable"
+                    }
+                },
+                "parameters": {
+                    "xOff": -1,
+                    "yOff": 0,
+                    "zOff": 0,
+                    "triggerId": "onBreak"
+                }
+            },
+            {
+                "actionId": "base:run_trigger",
+                "if": {
+                    "block_at": {
+                        "xOff": 0,
+                        "yOff": 1,
+                        "zOff": 0,
+                        "has_tag": "ore_replaceable"
+                    }
+                },
+                "parameters": {
+                    "xOff": 0,
+                    "yOff": 1,
+                    "zOff": 0,
+                    "triggerId": "onBreak"
+                }
+            },
+            {
+                "actionId": "base:run_trigger",
+                "if": {
+                    "block_at": {
+                        "xOff": 0,
+                        "yOff": -1,
+                        "zOff": 0,
+                        "has_tag": "ore_replaceable"
+                    }
+                },
+                "parameters": {
+                    "xOff": 0,
+                    "yOff": -1,
+                    "zOff": 0,
+                    "triggerId": "onBreak"
+                }
+            }
+        ]
+    },
+    "parent": "base:block_events_default"
+}

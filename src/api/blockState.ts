@@ -51,7 +51,6 @@ export interface SerializedBlockState {
     bounciness?: number;
     canPlace?: IBlockEventPredicate;
     rotation?: [ number, number, number ];
-    rotXZ?: number;
     dropParams?: Record<string, string>;
     allowSwapping?: boolean;
     isFluid?: boolean
@@ -86,8 +85,7 @@ export class BlockState {
     public langKey: LangKey = null;
     public bounciness: number = null; // default 0
     public canPlace: BlockEventPredicate = null;
-    public rotation: [ number, number, number ] = null;
-    public rotXZ: number = null; // default 0, valid: 0, 90, 180, 270
+    public rotation: [ number, number, number ] = [ 0, 0, 0 ];
     public dropParamOverrides: Record<string, string>;
     public allowSwapping: boolean = null; // default true
     public isFluid: boolean = null;
@@ -156,14 +154,13 @@ export class BlockState {
             modelName: this.model.getBlockModelId().toString()
         };
 
-        if(this.rotXZ != null) object.rotXZ = this.rotXZ;
         if(this.rotation != null) {
-            object.rotation = this.rotation;
+            if(this.rotation[0] != 0 || this.rotation[1] != 0 || this.rotation[2] != 0) {
+                object.rotation = this.rotation;
 
-            // TO FIX A BUG IN THE GAME
-            object.rotXZ ??= 0;
-            object.rotXZ += object.rotation[1];
-            object.rotation[1] = 0;
+                // cosmic reach is STILL broken with rotations
+                (object as any).rotXZ = this.rotation[1];
+            }
         }
         if(this.triggerSheet != null) object.blockEventsId = this.triggerSheet.getTriggerSheetId().toString();
         if(this.canPlace != null) object.canPlace = this.canPlace;

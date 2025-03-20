@@ -584,7 +584,7 @@ export class BlockModel {
         return this;
     }
     public rotateY(amount: number) {
-        const transformation = new Matrix4().makeRotationFromEuler(new Euler(0, amount * Math.PI / 180, 0));
+        const transformation = new Matrix4().makeRotationFromEuler(new Euler(0, -amount * Math.PI / 180, 0));
         this.applyTransformation(transformation);
 
         for(const cuboid of this.cuboids) {
