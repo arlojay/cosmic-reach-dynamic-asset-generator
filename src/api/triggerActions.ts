@@ -302,6 +302,24 @@ export class SetSphericalSegment extends TriggerAction<{
     }
 }
 
+export class PushBlockAction extends TriggerAction<{
+    stopTag: string;
+    directionParam: string;
+    pushLength: number;
+    successTrigger: string;
+}> {
+    public name: string = "base:push_blocks";
+}
+
+export class PullBlockAction extends TriggerAction<{
+    stopTag: string;
+    directionParam: string;
+    pullLength: number;
+    successTrigger: string;
+}> {
+    public name: string = "base:pull_blocks";
+}
+
 export class CustomAction extends TriggerAction<{}> {
     public constructor(name: string, params: Record<string, any>) {
         super(params);
