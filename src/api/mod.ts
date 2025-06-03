@@ -20,7 +20,7 @@ import { BlockModel } from "./blockModel";
 import { BlockStateGenerator } from "./blockStateGenerator";
 import { Crafting } from "./crafting";
 import { Identifier } from "./identifier";
-import { Item } from "./item";
+import { Item, ItemLike } from "./item";
 import { LangMap } from "./lang";
 import { LootTable } from "./loot";
 import { TriggerSheet } from "./triggerSheet";
@@ -85,8 +85,8 @@ export class Mod {
         return lootTable;
     }
 
-    public createCraftingRecipe(id: string) {
-        return this.crafting.createCraftingRecipe(id);
+    public createCraftingRecipe(id: string, result: ItemLike, amount?: number) {
+        return this.crafting.createCraftingRecipe(id, result, amount);
     }
     public createFurnaceRecipe(id: string) {
         return this.crafting.createFurnaceRecipe(id);

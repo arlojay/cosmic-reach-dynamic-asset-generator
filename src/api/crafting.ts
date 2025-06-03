@@ -14,25 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { CraftingRecipeList } from "./craftingRecipe";
+import { BasicCraftingRecipe } from "./basicCraftingRecipe";
 import { FurnaceRecipeList } from "./furnaceRecipe";
 import { Identifier } from "./identifier";
+import { ItemLike } from "./item";
 import { Mod } from "./mod";
 
 export class Crafting {
     private mod: Mod;
-    public craftingRecipes: Set<CraftingRecipeList> = new Set;
+    public craftingRecipes: Set<BasicCraftingRecipe> = new Set;
     public furnaceRecipes: Set<FurnaceRecipeList> = new Set;
 
     public constructor(mod: Mod) {
         this.mod = mod;
     }
 
-    public createCraftingRecipe(id: string): CraftingRecipeList {
-        const list = new CraftingRecipeList(new Identifier(this.mod, id));
+    public createCraftingRecipe(id: string, result: ItemLike, amount?: number): BasicCraftingRecipe {
+        const recipe = new BasicCraftingRecipe(new Identifier(this.mod, id));
+        recipe.setResult(result, amount);
 
-        this.craftingRecipes.add(list);
-        return list;
+        this.craftingRecipes.add(recipe);
+        return recipe;
     }
 
     public createFurnaceRecipe(id: string): FurnaceRecipeList {

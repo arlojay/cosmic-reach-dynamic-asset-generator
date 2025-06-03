@@ -64,6 +64,7 @@ export class CraftingIngredient implements CraftingIngredientOptions {
     }
 }
 
+/** @deprecated */
 export class ShapedCraftingRecipe implements CraftingRecipe<SerializedCraftingRecipe> {
     private items: Map<string, CraftingIngredient> = new Map;
     public result: ItemLike = null;
@@ -190,6 +191,7 @@ interface ShapelessCraftingRecipeEntry {
     count: number;
 }
 
+/** @deprecated */
 export class ShapelessCraftingRecipe implements CraftingRecipe<SerializedShapelessCraftingRecipe> {
     private items: Set<ShapelessCraftingRecipeEntry> = new Set;
     public result: ItemLike = null;
@@ -257,6 +259,7 @@ export interface SerializedCraftingRecipeList {
     recipes: any[];
 }
 
+/** @deprecated */
 export class CraftingRecipeList {
     public id: Identifier;
     public recipes: Set<CraftingRecipe<any>> = new Set;
@@ -265,6 +268,7 @@ export class CraftingRecipeList {
         this.id = id;
     }
 
+    /** @deprecated */
     public createShaped(output: ItemLike, outputCount: number = 1) {
         const recipe = new ShapedCraftingRecipe();
         recipe.setResult(output, outputCount);
@@ -274,6 +278,7 @@ export class CraftingRecipeList {
         return recipe;
     }
 
+    /** @deprecated */
     public createShapeless(output: ItemLike, outputCount: number = 1) {
         const recipe = new ShapelessCraftingRecipe();
         recipe.setResult(output, outputCount);
