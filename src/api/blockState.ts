@@ -79,7 +79,7 @@ export class BlockState {
     public dropState: BlockState = null;
     public catalogHidden: boolean = null;
     public fuelTicks: number = null; // part of intProperties.fuelTicks for some reason
-    public light: [ number, number, number ] = null;
+    public light: [ number, number, number ] = [ 0, 0, 0 ];
     public swapGroupId: Identifier = null;
     public friction: number = null; // default 1?
     public langKey: LangKey = null;
@@ -149,6 +149,57 @@ export class BlockState {
         this.langKey = key;
     }
 
+    public derive(extraProperties: Map<string, string> | Record<string, string> | string) {
+        const blockState = this.block.createState(this.params);
+
+        if(extraProperties != null) {
+            if(extraProperties instanceof Map) {
+                for(const [ key, value ] of extraProperties) {
+                    blockState.params.set(key, value);
+                }
+            } else if(typeof extraProperties == "object") {
+                for(const [ key, value ] of Object.entries(extraProperties)) {
+                    blockState.params.set(key, value);
+                }
+            } else if(typeof extraProperties == "string") {
+                for(const pair of extraProperties.split(",")) {
+                    const [ key, value ] = pair.split("=");
+                    blockState.params.set(key, value);
+                }
+            }
+        }
+
+        blockState.model = this.model;
+        blockState.triggerSheet = this.triggerSheet;
+        blockState.isOpaque = this.isOpaque;
+        blockState.lightAttenuation = this.lightAttenuation;
+        blockState.canRaycastForBreak = this.canRaycastForBreak;
+        blockState.canRaycastForPlaceOn = this.canRaycastForPlaceOn;
+        blockState.canRaycastForReplace = this.canRaycastForReplace;
+        blockState.walkThrough = this.walkThrough;
+        blockState.tags = Array.from(this.tags);
+        blockState.stateGenerators = new Set(this.stateGenerators);
+        blockState.placementRules = this.placementRules;
+        blockState.hardness = this.hardness;
+        blockState.dropState = this.dropState;
+        blockState.catalogHidden = this.catalogHidden;
+        blockState.fuelTicks = this.fuelTicks;
+        blockState.light = this.light == null ? null : [this.light[0], this.light[1], this.light[2]];
+        blockState.swapGroupId = this.swapGroupId;
+        blockState.friction = this.friction;
+        blockState.langKey = this.langKey;
+        blockState.bounciness = this.bounciness;
+        blockState.canPlace = this.canPlace;
+        blockState.rotation = [this.rotation[0], this.rotation[1], this.rotation[2]];
+        blockState.dropParamOverrides = this.dropParamOverrides;
+        blockState.allowSwapping = this.allowSwapping;
+        blockState.isFluid = this.isFluid;
+        blockState.itemIcon = this.itemIcon;
+        blockState.refractiveIndex = this.refractiveIndex;
+
+        return blockState;
+    }
+
     public serialize(): SerializedBlockState {
         const object: SerializedBlockState = {
             modelName: this.model.getBlockModelId().toString()
@@ -157,9 +208,6 @@ export class BlockState {
         if(this.rotation != null) {
             if(this.rotation[0] != 0 || this.rotation[1] != 0 || this.rotation[2] != 0) {
                 object.rotation = this.rotation;
-
-                // cosmic reach is STILL broken with rotations
-                (object as any).rotXZ = this.rotation[1];
             }
         }
         if(this.triggerSheet != null) object.blockEventsId = this.triggerSheet.getTriggerSheetId().toString();
@@ -192,7 +240,7 @@ export class BlockState {
         if(this.catalogHidden != null) object.catalogHidden = this.catalogHidden;
         if(this.itemIcon != null) object.itemIcon = this.itemIcon.getAsItemTextureId(this.mod).toString();
 
-        if(this.light != null) {
+        if(this.light[0] != 0 || this.light[1] != 0 || this.light[2] != 0) {
             object.lightLevelRed = this.light[0];
             object.lightLevelGreen = this.light[1];
             object.lightLevelBlue = this.light[2];
