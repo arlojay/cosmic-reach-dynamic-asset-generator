@@ -471,6 +471,19 @@ export class BlockModel {
         }
     }
 
+    public replaceTexture(oldTexture: string | Texture, newTexture: Texture) {
+        const allFaces: BlockModelFace[] = Array.from(this.cuboids).reduce(
+            (allFaces, cuboid) => allFaces.concat(cuboid.getAllFaces()),
+            new Array
+        );
+
+        for(const face of allFaces) {
+            if(face.texture == oldTexture || face.texture.id == oldTexture) {
+                face.texture = newTexture;
+            }
+        }
+    }
+
     public getTextureOverrides() {
         return new Map(this.textureOverrides);
     }
