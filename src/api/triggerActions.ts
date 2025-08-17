@@ -135,7 +135,7 @@ export class PlaySound3DAction extends TriggerAction<{
     protected modifyParams(params: any): void {
         if(params.sound != null) {
             if(params.sound instanceof Sound) params.sound = params.sound.getAsBlockSoundId(this.mod);
-            else if(params.sound instanceof Identifier) params.sound = params.sound.toString();
+            if(params.sound instanceof Identifier) params.sound = params.sound.toString();
         }
     }
 }
